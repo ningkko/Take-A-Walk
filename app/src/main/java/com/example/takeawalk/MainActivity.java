@@ -1,21 +1,14 @@
 package com.example.takeawalk;
 
-import android.app.Activity;
 import android.content.Intent;
-import android.net.IpSecManager;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.ToggleButton;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -25,7 +18,7 @@ public class MainActivity extends AppCompatActivity {
      * spinner 1 for larger unit inputs ::= hr, miles
      * spinner 2 for smaller units ::= min
      */
-    private Spinner activitySpinner, spinner1,spinner2;
+    private Spinner activitySpinner, spinner1, spinner2;
 
     /**
      * activityAdapter ::= selections for activitySpinner
@@ -40,7 +33,7 @@ public class MainActivity extends AppCompatActivity {
      * getRouteButton ::= get recommended routes
      * changeLocationButton ::= select a new location
      */
-    private Button getRouteButton,changeLocationButton;
+    private Button getRouteButton, changeLocationButton;
 
 
     /**
@@ -103,12 +96,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    private void initialize(){
+    private void initialize() {
 
         // setup activity drop down menu
         activitySpinner = (Spinner) findViewById(R.id.activitySpinner);
         // Create an ArrayAdapter using the string array and a default spinner layout
-        activityAdapter = ArrayAdapter.createFromResource(this,R.array.activity_array, android.R.layout.simple_spinner_item);
+        activityAdapter = ArrayAdapter.createFromResource(this, R.array.activity_array, android.R.layout.simple_spinner_item);
 
         spinner1 = (Spinner) findViewById(R.id.spinner1);
         spinner2 = (Spinner) findViewById(R.id.spinner2);
@@ -119,15 +112,18 @@ public class MainActivity extends AppCompatActivity {
         mileAdapter = ArrayAdapter.createFromResource(this, R.array.mile_array, android.R.layout.simple_spinner_item);
         mileDeciAdapter = ArrayAdapter.createFromResource(this, R.array.mile_decimal_array, android.R.layout.simple_spinner_item);
 
-        getRouteButton = (Button)findViewById(R.id.getRoute);
-        changeLocationButton = (Button)findViewById(R.id.changeLocation);
+        getRouteButton = (Button) findViewById(R.id.getRoute);
+        changeLocationButton = (Button) findViewById(R.id.changeLocation);
         inputType = (Button) findViewById(R.id.inputType);
 
-        unit1=(TextView) findViewById(R.id.unit1);
-        unit2=(TextView) findViewById(R.id.unit2);
+        unit1 = (TextView) findViewById(R.id.unit1);
+        unit2 = (TextView) findViewById(R.id.unit2);
 
         startLocationLabel = (TextView) findViewById(R.id.startPositionLabel);
+
+
     }
+
 
     /**
      * switches btw DISTANCE and TIME inputs
