@@ -24,7 +24,7 @@
         android:layout_marginRight="16dp"
         android:layout_marginBottom="16dp"
         android:backgroundTint="#80ff1677"
-        android:src="@android:drawable/ic_input_add"
+        android:src="@drawable/ic_arrow_back_black_24dp"
         app:fabSize="mini"
         />
 
