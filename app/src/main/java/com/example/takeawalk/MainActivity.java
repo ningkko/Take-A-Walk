@@ -91,7 +91,7 @@ public class MainActivity extends AppCompatActivity {
 
         // get values
         readInputs();
-        logTester();
+        Monitor.speedReporter();
 
     }
 
@@ -131,7 +131,7 @@ public class MainActivity extends AppCompatActivity {
     public void changeInputTypeHandler(){
 
         readInputs();
-        logTester();
+        Monitor.speedReporter();
 
         if (Data.inputType==2){
             Data.inputType=1;
@@ -149,7 +149,7 @@ public class MainActivity extends AppCompatActivity {
             spinner1.setAdapter(mileAdapter);
             spinner2.setAdapter(mileDeciAdapter);
             unit1.setText(" . ");
-            unit2.setText("MI.");
+            unit2.setText("Km");
             spinner1.setSelection(Data.s1U2Position);
             spinner2.setSelection(Data.s2U2Position);
         }
@@ -173,12 +173,5 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    private void logTester(){
 
-        Log.i(Data.TAG,"Activity type: "+Data.activity);
-        Log.i(Data.TAG,"Estimated Distance: "+Data.distance+" miles");
-        Log.i(Data.TAG,"Will finish in: "+Data.time+" minutes");
-        Log.i(Data.TAG,"Estimated speed: "+Data.speed+" based on national data");
-
-    }
 }
