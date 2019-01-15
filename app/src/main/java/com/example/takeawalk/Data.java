@@ -33,6 +33,8 @@ public class Data {
 
 
     public static double distance=0;
-    public static int time=0;
+    public static double time=0;
     public static double speed=0;
+    public static double distanceRmained;
+    public static double timeRemained;
 }
