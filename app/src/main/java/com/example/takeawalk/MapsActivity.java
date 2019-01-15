@@ -15,6 +15,7 @@ import android.widget.Toast;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.SupportMapFragment;
 
 public class MapsActivity extends AppCompatActivity implements GoogleMap.OnMyLocationButtonClickListener,
@@ -40,21 +41,35 @@ public class MapsActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        floatingButton = findViewById(R.id.more);
-        floatingButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                FloatingButtonHandler();
-            }
-        });
+//        floatingButton = findViewById(R.id.more);
+//        floatingButton.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                FloatingButtonHandler();
+//            }
+//        });
         Log.d(Data.TAG, "maps page opening");
     }
 
-    public void FloatingButtonHandler(){
+//    public void FloatingButtonHandler(){
+//
+//        Intent intent = new Intent(this, MainActivity.class);
+//        startActivity(intent);
+//
+//    }
 
-        Intent intent = new Intent(this, MainActivity.class);
-        startActivity(intent);
-
+    private void setupGoogleMapScreenSettings(GoogleMap mMap) {
+        mMap.setBuildingsEnabled(true);
+        mMap.setIndoorEnabled(true);
+        mMap.setTrafficEnabled(true);
+        UiSettings mUiSettings = mMap.getUiSettings();
+        mUiSettings.setZoomControlsEnabled(true);
+        mUiSettings.setCompassEnabled(true);
+        mUiSettings.setMyLocationButtonEnabled(true);
+        mUiSettings.setScrollGesturesEnabled(true);
+        mUiSettings.setZoomGesturesEnabled(true);
+        mUiSettings.setTiltGesturesEnabled(true);
+        mUiSettings.setRotateGesturesEnabled(true);
     }
 
     @Override
