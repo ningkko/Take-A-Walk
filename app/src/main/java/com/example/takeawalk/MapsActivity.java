@@ -22,7 +22,7 @@ public class MapsActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
         GoogleMap.OnMyLocationClickListener,OnMapReadyCallback {
 
     private GoogleMap mMap;
-    private FloatingActionButton floatingButton;
+    private FloatingActionButton backButton;
 
     private boolean mPermissionDenied = false;
     /**
@@ -41,22 +41,20 @@ public class MapsActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-//        floatingButton = findViewById(R.id.more);
-//        floatingButton.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                FloatingButtonHandler();
-//            }
-//        });
-        Log.d(Data.TAG, "maps page opening");
+        backButton = findViewById(R.id.more);
+        backButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                BackButtonHandler();
+            }
+        });
     }
 
-//    public void FloatingButtonHandler(){
-//
-//        Intent intent = new Intent(this, MainActivity.class);
-//        startActivity(intent);
-//
-//    }
+    public void BackButtonHandler(){
+        Intent intent = new Intent(this, MainActivity.class);
+        startActivity(intent);
+
+    }
 
     private void setupGoogleMapScreenSettings(GoogleMap mMap) {
         mMap.setBuildingsEnabled(true);

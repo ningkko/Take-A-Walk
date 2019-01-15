@@ -23,7 +23,7 @@
         android:focusable="true"
         android:layout_gravity="bottom|start"
         android:layout_marginStart="16dp"
-        android:layout_marginBottom="16dp"
+        android:layout_marginBottom="32dp"
         android:src="@drawable/ic_arrow_back_black_24dp"
         app:fabSize="mini"
         />
