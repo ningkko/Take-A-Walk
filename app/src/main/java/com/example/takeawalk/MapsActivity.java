@@ -4,56 +4,26 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
+import android.os.Build;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
-import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
-
-import java.io.IOException;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
-import android.content.pm.PackageManager;
-import android.location.Location;
-import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.design.widget.FloatingActionButton;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.content.ContextCompat;
-import android.util.Log;
-import android.view.View;
-
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.location.places.GeoDataClient;
-import com.google.android.gms.location.places.PlaceDetectionClient;
-import com.google.android.gms.location.places.Places;
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.UiSettings;
-import com.google.android.gms.maps.model.CameraPosition;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.PolylineOptions;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.maps.DirectionsApi;
 import com.google.maps.GeoApiContext;
 import com.google.maps.android.PolyUtil;
@@ -83,14 +53,27 @@ public class MapsActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
      */
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
 
+    /**
+     * for updating current location
+     */
+    private LocationManager locationManager;
+    private LocationListener locationListener;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
+
+
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
+
+        /**
+         * go back to the input page
+         */
         backButton = findViewById(R.id.more);
         backButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -98,12 +81,79 @@ public class MapsActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
                 BackButtonHandler();
             }
         });
+
+
+        /**
+         * get current locations
+         */
+        locationManager = (LocationManager) this.getSystemService(LOCATION_SERVICE);
+        locationListener = new LocationListener() {
+
+            @Override
+            public void onLocationChanged(Location location) {
+                // update the marker if location changes
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 12));
+            }
+
+            @Override
+            public void onStatusChanged(String provider, int status, Bundle extras) {
+
+            }
+
+            @Override
+            public void onProviderEnabled(String provider) {
+
+            }
+
+            @Override
+            public void onProviderDisabled(String provider) {
+
+            }
+        };
+
+        // checks if have user permission for getting current locations
+        checkPermission();
     }
 
+
+    public void checkPermission(){
+
+        // if apk smaller than 23, no need for checking permission
+        if (Build.VERSION.SDK_INT<23){
+
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+
+        }else{
+
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                // TODO: Consider calling
+                //    ActivityCompat#requestPermissions
+                // here to request the missing permissions, and then overriding
+                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                //                                          int[] grantResults)
+                // to handle the case where the user grants the permission. See the documentation
+                // for ActivityCompat#requestPermissions for more details.
+
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                        1);
+
+
+            }else{
+
+                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+
+            }
+        }
+    }
+
+
+    /**
+     * switch back to mainActivity rather than just "go back"
+     */
     public void BackButtonHandler(){
         Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);
-
     }
 
     private void setupGoogleMapScreenSettings(GoogleMap mMap) {
@@ -216,6 +266,7 @@ public class MapsActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
+
         if (requestCode != LOCATION_PERMISSION_REQUEST_CODE) {
             return;
         }
@@ -228,6 +279,18 @@ public class MapsActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
             // Display the missing permission error dialog when the fragments resume.
             mPermissionDenied = true;
         }
+
+        if (grantResults.length>0&&grantResults[0] == PackageManager.PERMISSION_GRANTED){
+
+            if (ContextCompat.checkSelfPermission(this,
+                    Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED){
+
+                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+
+            }
+        }
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
     }
 
     @Override
@@ -272,6 +335,7 @@ public class MapsActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
             return null;
         }
     }
+
 }
 
 
