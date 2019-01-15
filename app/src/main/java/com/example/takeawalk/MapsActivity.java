@@ -72,7 +72,6 @@ public class MapsActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
-
         mMap = googleMap;
 
         // Add a marker in Sydney and move the camera
@@ -80,7 +79,6 @@ public class MapsActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
         mMap.setOnMyLocationClickListener(this);
         enableMyLocation();
         setupGoogleMapScreenSettings(googleMap);
-        Log.d(Data.TAG, "map ready done");
     }
 
     /**
@@ -101,14 +99,14 @@ public class MapsActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
 
     @Override
     public boolean onMyLocationButtonClick() {
-        Toast.makeText(this, "MyLocation button clicked", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Getting your current location", Toast.LENGTH_SHORT).show();
         return false;
     }
 
     @Override
     public void onMyLocationClick(@NonNull Location location) {
-        Toast.makeText(this, "Current location:\n" + location, Toast.LENGTH_LONG).show();
-
+        String message = Double.toString(location.getLatitude())+", "+Double.toString(location.getLongitude());
+        Toast.makeText(this, "Current location:\n" + message, Toast.LENGTH_LONG).show();
     }
 
     @Override
@@ -128,8 +126,6 @@ public class MapsActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
         }
     }
 
-
-
     @Override
     protected void onResumeFragments() {
         super.onResumeFragments();
@@ -139,6 +135,7 @@ public class MapsActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
             mPermissionDenied = false;
         }
     }
+
     /**
      * Displays a dialog with error message explaining that the location permission is missing.
      */
