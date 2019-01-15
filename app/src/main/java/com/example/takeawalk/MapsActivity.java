@@ -81,6 +81,7 @@ public class MapsActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
         mMap.setOnMyLocationButtonClickListener(this);
         mMap.setOnMyLocationClickListener(this);
         enableMyLocation();
+        setupGoogleMapScreenSettings(googleMap);
         Log.d(Data.TAG, "map ready done");
     }
 
