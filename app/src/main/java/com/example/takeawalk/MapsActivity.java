@@ -88,8 +88,7 @@ public class MapsActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
         backButton = findViewById(R.id.more);
@@ -119,6 +118,11 @@ public class MapsActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
         mUiSettings.setZoomGesturesEnabled(true);
         mUiSettings.setTiltGesturesEnabled(true);
         mUiSettings.setRotateGesturesEnabled(true);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
     }
 
     @Override
