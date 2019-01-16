@@ -13,6 +13,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
@@ -58,6 +59,7 @@ public class MapsActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
      */
     private LocationManager locationManager;
     private LocationListener locationListener;
+    private static final String TAG = "print";
 
 
     @Override
@@ -194,7 +196,7 @@ public class MapsActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
         setupGoogleMapScreenSettings(googleMap);
 
         DirectionsResult dr = getDirectionsDetails("483 George St, Sydney NSW 2000, Australia","182 Church St, Parramatta NSW 2150, Australia",TravelMode.DRIVING);
-        //Log.d(TAG, "If result is null " + dr);
+        Log.d(TAG, "If result is null " + dr);
         if (dr != null) {
             addPolyline(dr, googleMap);
             positionCamera(dr.routes[overview], googleMap);
