@@ -92,7 +92,7 @@ public class MapsActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
             @Override
             public void onLocationChanged(Location location) {
                 // update the marker if location changes
-                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 12));
+                // mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 12));
                 // get current user speed
                 Data.speed=location.getSpeedAccuracyMetersPerSecond();
                 // report speed
