@@ -57,7 +57,7 @@ public class MainActivity extends AppCompatActivity {
     private static final int TIME = 1;
     private static final int DISTANCE = 2;
 
-    public int inputType = TIME;
+    public int inputType = DISTANCE;
     public String activity = "walking";
     public int unit1Value, unit2Value = 0;
 

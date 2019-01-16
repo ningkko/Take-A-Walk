@@ -71,7 +71,6 @@ public class MapsActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
     private LocationListener locationListener;
     private Location currentLocation;
     private String mode;
-    private HashMap<String, double[]> three = null;
 
     private static final String TAG = "print";
 
@@ -120,13 +119,11 @@ public class MapsActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
                 //Log.d(TAG, "location changed");
                 if (currentLocation == null) {
                     currentLocation = location;
-                    three = drawRoute();
-                    createPolyline(mMap, three);
-                    //Log.d(TAG, "if three is " + three);
+                    HashMap<String, double[]> routeMap = getRoutePoints(currentLocation.getLatitude(), currentLocation.getLongitude(), distance);
+                    drawRoute(mMap, routeMap);
                 }
 
                 currentLocation = location;
-                //Log.d(TAG, "chack again three " + three);
             }
 
             @Override
@@ -218,19 +215,17 @@ public class MapsActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
 
     }
 
-    private void createPolyline(GoogleMap googleMap, HashMap<String, double[]> three) throws NullPointerException{
-        if (three != null) {
-            com.google.maps.model.LatLng A = new com.google.maps.model.LatLng(three.get("A")[0], three.get("A")[1]);
-            com.google.maps.model.LatLng B = new com.google.maps.model.LatLng(three.get("B")[0], three.get("B")[1]);
-            com.google.maps.model.LatLng C = new com.google.maps.model.LatLng(three.get("C")[0], three.get("C")[1]);
+    private void drawRoute(GoogleMap googleMap, HashMap<String, double[]> routeMap) throws NullPointerException{
+        if (routeMap != null) {
+            com.google.maps.model.LatLng A = new com.google.maps.model.LatLng(routeMap.get("A")[0], routeMap.get("A")[1]);
+            com.google.maps.model.LatLng B = new com.google.maps.model.LatLng(routeMap.get("B")[0], routeMap.get("B")[1]);
+            com.google.maps.model.LatLng C = new com.google.maps.model.LatLng(routeMap.get("C")[0], routeMap.get("C")[1]);
 
             setupGoogleMapScreenSettings(googleMap);
             TravelMode travelMode;
 
             if (mode == "Walking") {
                 travelMode = TravelMode.WALKING;
-            } else if (mode == "Driving") {
-                travelMode = TravelMode.DRIVING;
             } else if (mode == "Biking") {
                 travelMode = TravelMode.BICYCLING;
             } else {
@@ -258,10 +253,7 @@ public class MapsActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
 
             ArrayList<Pair<Polyline, String>> polys = addPolyline(polylines, googleMap);
             mapListener(polys, mMap);
-        } else {
-            Log.d(TAG, "three is null");
         }
-
     }
 
     public void mapListener(final ArrayList<Pair<Polyline, String>> results, final GoogleMap mMap) {
@@ -318,14 +310,6 @@ public class MapsActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
         });
     }
 
-    private HashMap<String, double[]> drawRoute() {
-        // get map with three points that make up triangular route
-        Log.d(TAG, "getting route points");
-        HashMap<String, double[]> routeMap = getRoutePoints(currentLocation.getLatitude(), currentLocation.getLongitude(), distance);
-        Log.d(TAG, "route map checking " + routeMap);
-        return routeMap;
-    }
-
     private void positionCamera(DirectionsRoute route, GoogleMap mMap) {
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(route.legs[overview].startLocation.lat, route.legs[overview].startLocation.lng), 12));
     }
@@ -339,7 +323,7 @@ public class MapsActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
             String time = result.routes[0].legs[0].duration.humanReadable;
             String distance = Long.toString(result.routes[0].legs[0].distance.inMeters);
 
-            String title = "Distance: " + distance + "meters; Time: " + time;
+            String title = "Distance: " + distance + " meters; Time: " + time;
 
             polylines.add(Pair.create(pl, title));
 
