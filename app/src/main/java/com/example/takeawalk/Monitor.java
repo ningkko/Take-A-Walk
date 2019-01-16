@@ -29,14 +29,8 @@ public class Monitor {
 
 
     public static double getDefaultSpeedInMetersPerSec(String activity){
-
-        if (activity.toLowerCase().equals("running")){
-            return 2.5;
-
-        }else if(activity.toLowerCase().equals("walking")){
-
+        if(activity.toLowerCase().equals("walking")){
             return 1.4;
-
         }else{
             return 5.36;
         }

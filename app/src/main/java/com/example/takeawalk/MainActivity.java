@@ -16,8 +16,8 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = "PRINT";
 
     /**
-     * activitySpinner ::= running, walking, biking
-     * spinner 1 for larger unit inputs ::= hr, miles
+     * activitySpinner ::= walking, biking
+     * spinner 1 for larger unit inputs ::= hr, km
      * spinner 2 for smaller units ::= min
      */
     private Spinner activitySpinner, spinner1, spinner2;
@@ -29,7 +29,7 @@ public class MainActivity extends AppCompatActivity {
      */
     private ArrayAdapter<CharSequence> activityAdapter,
             hrAdapter, minAdapter,
-            mileAdapter, mileDeciAdapter;
+            kmAdapter, kmDeciAdapter;
 
     /**
      * getRouteButton ::= get recommended routes
@@ -58,7 +58,7 @@ public class MainActivity extends AppCompatActivity {
     private static final int DISTANCE = 2;
 
     public int inputType = TIME;
-    public String activity = "running";
+    public String activity = "walking";
     public int unit1Value, unit2Value = 0;
 
 
@@ -146,8 +146,8 @@ public class MainActivity extends AppCompatActivity {
         hrAdapter = ArrayAdapter.createFromResource(this, R.array.hr_array, android.R.layout.simple_spinner_item);
         minAdapter = ArrayAdapter.createFromResource(this, R.array.min_array, android.R.layout.simple_spinner_item);
 
-        mileAdapter = ArrayAdapter.createFromResource(this, R.array.mile_array, android.R.layout.simple_spinner_item);
-        mileDeciAdapter = ArrayAdapter.createFromResource(this, R.array.mile_decimal_array, android.R.layout.simple_spinner_item);
+        kmAdapter = ArrayAdapter.createFromResource(this, R.array.mile_array, android.R.layout.simple_spinner_item);
+        kmDeciAdapter = ArrayAdapter.createFromResource(this, R.array.mile_decimal_array, android.R.layout.simple_spinner_item);
 
         getRouteButton = (Button) findViewById(R.id.getRoute);
         changeLocationButton = (Button) findViewById(R.id.changeLocation);
@@ -183,8 +183,8 @@ public class MainActivity extends AppCompatActivity {
         }else {
             inputType=DISTANCE;
             inputTypeButton.setText("DISTANCE");
-            spinner1.setAdapter(mileAdapter);
-            spinner2.setAdapter(mileDeciAdapter);
+            spinner1.setAdapter(kmAdapter);
+            spinner2.setAdapter(kmDeciAdapter);
             unit1.setText(" . ");
             unit2.setText("Km");
             spinner1.setSelection(s1U2Position);
