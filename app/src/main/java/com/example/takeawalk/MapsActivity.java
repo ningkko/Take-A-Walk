@@ -3,6 +3,9 @@ package com.example.takeawalk;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -14,6 +17,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.util.Pair;
 import android.view.View;
 import android.widget.Toast;
 
@@ -23,7 +27,9 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.maps.DirectionsApi;
 import com.google.maps.GeoApiContext;
@@ -37,6 +43,7 @@ import org.joda.time.DateTime;
 
 import java.io.IOException;
 import java.security.Key;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
@@ -63,6 +70,8 @@ public class MapsActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
     private LocationManager locationManager;
     private LocationListener locationListener;
     private Location currentLocation;
+    private String mode;
+    private HashMap<String, double[]> three = null;
 
     private static final String TAG = "print";
 
@@ -79,6 +88,7 @@ public class MapsActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
         // retrive data from activity 1
         Intent intent = getIntent();
         distance = intent.getDoubleExtra(Keys.DISTANCE,0.0);
+        mode = intent.getStringExtra(Keys.ACTIVITYTYPE);
         activityType = intent.getStringExtra(Keys.ACTIVITYTYPE);
 
 
@@ -107,13 +117,16 @@ public class MapsActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
 
             @Override
             public void onLocationChanged(Location location) {
-                Log.d(TAG, "location changed");
+                //Log.d(TAG, "location changed");
                 if (currentLocation == null) {
                     currentLocation = location;
-                    drawRoute();
+                    three = drawRoute();
+                    createPolyline(mMap, three);
+                    //Log.d(TAG, "if three is " + three);
                 }
 
                 currentLocation = location;
+                //Log.d(TAG, "chack again three " + three);
             }
 
             @Override
@@ -201,32 +214,137 @@ public class MapsActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
         setupGoogleMapScreenSettings(googleMap);
 
 
+
+
     }
 
-    private void drawRoute() {
+    private void createPolyline(GoogleMap googleMap, HashMap<String, double[]> three) throws NullPointerException{
+        if (three != null) {
+            com.google.maps.model.LatLng A = new com.google.maps.model.LatLng(three.get("A")[0], three.get("A")[1]);
+            com.google.maps.model.LatLng B = new com.google.maps.model.LatLng(three.get("B")[0], three.get("B")[1]);
+            com.google.maps.model.LatLng C = new com.google.maps.model.LatLng(three.get("C")[0], three.get("C")[1]);
+
+            setupGoogleMapScreenSettings(googleMap);
+            TravelMode travelMode;
+
+            if (mode == "Walking") {
+                travelMode = TravelMode.WALKING;
+            } else if (mode == "Driving") {
+                travelMode = TravelMode.DRIVING;
+            } else if (mode == "Biking") {
+                travelMode = TravelMode.BICYCLING;
+            } else {
+                travelMode = TravelMode.WALKING;
+            }
+
+            DirectionsResult dr1 = getDirectionsDetails(A, B, travelMode);
+            DirectionsResult dr2 = getDirectionsDetails(A, C, travelMode);
+            DirectionsResult dr3 = getDirectionsDetails(B, C, travelMode);
+
+            ArrayList<DirectionsResult> polylines = new ArrayList<>();
+            polylines.add(dr1);
+            polylines.add(dr2);
+            polylines.add(dr3);
+
+            Log.d(TAG, "current location is null");
+            Log.d(TAG, "direction result is " + dr1);
+            for (int i = 0; i < polylines.size(); i++) {
+                DirectionsResult dr = polylines.get(i);
+                if (dr != null) {
+                    positionCamera(dr.routes[overview], googleMap);
+                    addMarkersToMap(dr, googleMap);
+                }
+            }
+
+            ArrayList<Pair<Polyline, String>> polys = addPolyline(polylines, googleMap);
+            mapListener(polys, mMap);
+        } else {
+            Log.d(TAG, "three is null");
+        }
+
+    }
+
+    public void mapListener(final ArrayList<Pair<Polyline, String>> results, final GoogleMap mMap) {
+        mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+
+            @Override
+            public void onMapClick(LatLng clickCoords) {
+
+                double inf = Double.POSITIVE_INFINITY;
+                Polyline p = null;
+                String t = null;
+                for (int i = 0; i < results.size(); i++) {
+
+                    final String title = results.get(i).second;
+                    Polyline pl = results.get(i).first;
+                    pl.setColor(Color.RED);
+                    for (LatLng polyCoords : pl.getPoints()) {
+
+                        float[] results = new float[1];
+                        Location.distanceBetween(clickCoords.latitude, clickCoords.longitude,
+                                polyCoords.latitude, polyCoords.longitude, results);
+
+                        if (results[0] < 10000) {
+                            if (inf > results[0]) {
+                                inf = results[0];
+                                p = pl;
+                                t = title;
+                            }
+
+                        }
+
+                    }
+
+                }
+
+                if (inf != Double.POSITIVE_INFINITY && p != null & t != null) {
+                    Drawable tr = new ColorDrawable(Color.TRANSPARENT);
+                    p.setColor(Color.BLUE);
+                    Log.d(TAG, "Second change polyline " + p.toString() + " to blue");
+                    //pl.setVisible(true);
+                    Marker marker = mMap.addMarker(new MarkerOptions()
+                            .position(new LatLng(clickCoords.latitude, clickCoords.longitude)).alpha(0).title(t));
+
+
+//open the marker's info window
+                    marker.showInfoWindow();
+                    Log.e(TAG, "The second possible method @ " + clickCoords.latitude + " " + clickCoords.longitude);
+
+                }
+            }
+
+
+
+        });
+    }
+
+    private HashMap<String, double[]> drawRoute() {
         // get map with three points that make up triangular route
         Log.d(TAG, "getting route points");
         HashMap<String, double[]> routeMap = getRoutePoints(currentLocation.getLatitude(), currentLocation.getLongitude(), distance);
-
-        LatLng current = new LatLng(23.63936, 68.14712);
-        LatLng sydney = new LatLng(-34, 151);
-
-        DirectionsResult dr = getDirectionsDetails("483 George St, Sydney NSW 2000, Australia","182 Church St, Parramatta NSW 2150, Australia",TravelMode.DRIVING);
-        Log.d(TAG, "If result is null " + dr);
-        if (dr != null) {
-            addPolyline(dr, mMap);
-            positionCamera(dr.routes[overview], mMap);
-            addMarkersToMap(dr, mMap);
-        }
+        Log.d(TAG, "route map checking " + routeMap);
+        return routeMap;
     }
 
     private void positionCamera(DirectionsRoute route, GoogleMap mMap) {
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(route.legs[overview].startLocation.lat, route.legs[overview].startLocation.lng), 12));
     }
 
-    private void addPolyline(DirectionsResult results, GoogleMap mMap) {
-        List<LatLng> decodedPath = PolyUtil.decode(results.routes[overview].overviewPolyline.getEncodedPath());
-        mMap.addPolyline(new PolylineOptions().addAll(decodedPath));
+    private ArrayList<Pair<Polyline, String>> addPolyline(ArrayList<DirectionsResult> results, final GoogleMap mMap) {
+        ArrayList<Pair<Polyline, String>> polylines = new ArrayList<>();
+        for (DirectionsResult result:results) {
+            List<LatLng> decodedPath = PolyUtil.decode(result.routes[overview].overviewPolyline.getEncodedPath());
+            Polyline pl = mMap.addPolyline(new PolylineOptions().addAll(decodedPath).color(Color.RED).width(10));
+
+            String time = result.routes[0].legs[0].duration.humanReadable;
+            String distance = Long.toString(result.routes[0].legs[0].distance.inMeters);
+
+            String title = "Distance: " + distance + "meters; Time: " + time;
+
+            polylines.add(Pair.create(pl, title));
+
+        }
+        return polylines;
     }
 
     private void addMarkersToMap(DirectionsResult results, GoogleMap mMap) {
@@ -328,25 +446,25 @@ public class MapsActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
     }
 
 
-    private DirectionsResult getDirectionsDetails(String origin,String destination,TravelMode mode) {
+    private DirectionsResult getDirectionsDetails(com.google.maps.model.LatLng origin,com.google.maps.model.LatLng destination,TravelMode mode) {
         DateTime now = new DateTime();
         try {
             return DirectionsApi.newRequest(getGeoContext())
                     .mode(mode)
                     .origin(origin)
                     .destination(destination)
-                    .departureTime(now)
+                    .departureTime(now.plusHours(1))
                     .await();
         } catch (ApiException e) {
-            //Log.d(TAG, "ApiException " + e.getMessage());
+            Log.d(TAG, "ApiException " + e);
             e.printStackTrace();
             return null;
         } catch (InterruptedException e) {
-            //Log.d(TAG, "InterruptedException " + e.getMessage());
+            Log.d(TAG, "InterruptedException " + e);
             e.printStackTrace();
             return null;
         } catch (IOException e) {
-            //Log.d(TAG, "IOException " + e.getMessage());
+            Log.d(TAG, "IOException " + e);
             e.printStackTrace();
             return null;
         }
@@ -416,5 +534,6 @@ public class MapsActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
         return coordsMap;
     }
 }
+
 
 
