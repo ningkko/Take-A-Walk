@@ -37,7 +37,9 @@ import org.joda.time.DateTime;
 
 import java.io.IOException;
 import java.security.Key;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 public class MapsActivity extends AppCompatActivity implements GoogleMap.OnMyLocationButtonClickListener,
@@ -60,12 +62,14 @@ public class MapsActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
      */
     private LocationManager locationManager;
     private LocationListener locationListener;
-    private static final String TAG = "print";
+    private Location currentLocation;
 
+    private static final String TAG = "print";
 
     public double distance;
     public String activityType;
 
+    private Random random = new Random();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -103,12 +107,13 @@ public class MapsActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
 
             @Override
             public void onLocationChanged(Location location) {
-                // update the marker if location changes
+                Log.d(TAG, "location changed");
+                if (currentLocation == null) {
+                    currentLocation = location;
+                    drawRoute();
+                }
 
-                // get current user speed
-                // double speed=location.getSpeedAccuracyMetersPerSecond();
-                // report speed
-                //Monitor.speedReporter();
+                currentLocation = location;
             }
 
             @Override
@@ -195,22 +200,23 @@ public class MapsActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
         enableMyLocation();
         setupGoogleMapScreenSettings(googleMap);
 
-        // Turn on the My Location layer and the related control on the map.
-        //updateLocationUI();
-        //getDeviceLocation();
 
-        // Get the current location of the device and set the position of the map.
+    }
+
+    private void drawRoute() {
+        // get map with three points that make up triangular route
+        Log.d(TAG, "getting route points");
+        HashMap<String, double[]> routeMap = getRoutePoints(currentLocation.getLatitude(), currentLocation.getLongitude(), distance);
+
         LatLng current = new LatLng(23.63936, 68.14712);
         LatLng sydney = new LatLng(-34, 151);
-
-        setupGoogleMapScreenSettings(googleMap);
 
         DirectionsResult dr = getDirectionsDetails("483 George St, Sydney NSW 2000, Australia","182 Church St, Parramatta NSW 2150, Australia",TravelMode.DRIVING);
         Log.d(TAG, "If result is null " + dr);
         if (dr != null) {
-            addPolyline(dr, googleMap);
-            positionCamera(dr.routes[overview], googleMap);
-            addMarkersToMap(dr, googleMap);
+            addPolyline(dr, mMap);
+            positionCamera(dr.routes[overview], mMap);
+            addMarkersToMap(dr, mMap);
         }
     }
 
@@ -346,6 +352,70 @@ public class MapsActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
         }
     }
 
+
+    /**
+     * Gets a random point on a circle given center and radius of circle
+     * @param xOfCenter double, x coordinate of center of circle
+     * @param yOfCenter double, y coordinate of center of circle
+     * @param radius double, radius of circle in decimal degrees
+     * @return double array of size 2, y coordinate of point in first slot, x coordinate of point in second slot
+     */
+    private double[] findPointOnCircle(double xOfCenter, double yOfCenter, double radius){
+        // get a random theta value in range 0 to 2pi
+        double frac = random.nextDouble();
+        double theta = frac*2*Math.PI;
+
+        // get cartesian coordinates of point on circle (defined by randomly chosen theta and given radius)
+        double xOfPoint = xOfCenter + (radius*Math.cos(theta));
+        double yOfPoint = yOfCenter + (radius*Math.sin(theta));
+
+        double[] point = {yOfPoint, xOfPoint};
+
+        return point;
+    }
+
+
+    /**
+     * Gets two points (B and C) which create a triangular route of approximately a certain distance, given a starting point A and desired distance
+     * @param latitude double, latitude of starting point
+     * @param longitude double, longitude of starting point
+     * @param distanceMeters double, desired distance of route in meters
+     * @return hashmap with string keys and double array values, key is "A", "B", or "C", and values are [latitude, longitude] of the point in an array of size 2
+     */
+    private HashMap<String, double[]> getRoutePoints(double latitude, double longitude, double distanceMeters) {
+        HashMap<String, double[]> coordsMap = new HashMap<>();
+
+        // rename as x and y for clarity/consistency
+        double xOfA = longitude;
+        double yOfA = latitude;
+
+        // convert distance in meters to distance in decimal degrees (from https://stackoverflow.com/a/25237446)
+        double d = distanceMeters / (111.32 * 1000 * Math.cos(latitude * (Math.PI / 180)));
+
+        // pick a d1 in range d/(1+sqrt(2)) < d1 < d/2
+        double frac = random.nextDouble();
+        double lowRange = d/(1+Math.sqrt(2));
+        double d1 = lowRange + (frac*((d/2)-lowRange));
+
+        // find second point on route, B
+        double[] B = findPointOnCircle(xOfA, yOfA, d1);
+
+        // find midpoint of line from A to B
+        double xOfMidAB = (xOfA+B[1])/2;
+        double yOfMidAB = (yOfA+B[0])/2;
+
+        // find second point on route, C
+        double[] C = findPointOnCircle(xOfMidAB, yOfMidAB, (d1/2));
+
+        // put latitudes and longitudes for each stop in map
+        double[] coordsOfA = {latitude, longitude};
+        coordsMap.put("A", coordsOfA);
+        coordsMap.put("B", B);
+        coordsMap.put("C", C);
+
+        return coordsMap;
+    }
 }
+
 
 
