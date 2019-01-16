@@ -108,6 +108,13 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        changeLocationButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                changeLocationHandler();
+            }
+        });
+
         inputTypeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -132,6 +139,11 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    public void changeLocationHandler(){
+
+        Intent intent = new Intent(this, ChooseLocationActivity.class);
+        startActivity(intent);
+    }
 
     private void initialize() {
 
