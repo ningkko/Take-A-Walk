@@ -13,6 +13,8 @@ import android.widget.TextView;
 public class MainActivity extends AppCompatActivity {
 
 
+    private static final String TAG = "PRINT";
+
     /**
      * activitySpinner ::= running, walking, biking
      * spinner 1 for larger unit inputs ::= hr, miles
@@ -39,7 +41,7 @@ public class MainActivity extends AppCompatActivity {
     /**
      * time? or distance?
      */
-    private Button inputType;
+    private Button inputTypeButton;
 
     /**
      * units
@@ -47,6 +49,39 @@ public class MainActivity extends AppCompatActivity {
     private TextView unit1, unit2;
     private TextView startLocationLabel;
 
+
+    /**
+     * 1 ::=time
+     * 2 ::=distance
+     */
+    private static final int TIME = 1;
+    private static final int DISTANCE = 2;
+
+    public int inputType = TIME;
+    public String activity = "running";
+    public int unit1Value, unit2Value = 0;
+
+
+    /**
+     * position for spinner 1, unit 1
+     */
+    public int s1U1Position = 0;
+    /**
+     * position for spinner 1, unit 2
+     */
+    public int s2U1Position =0;
+
+    /**
+     * position for spinner 2, unit 1
+     */
+    public int s1U2Position = 0;
+    /**
+     * position for spinner 2, unit 2
+     */
+    public int s2U2Position =0;
+
+
+    public double distance=0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,7 +108,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        inputType.setOnClickListener(new View.OnClickListener() {
+        inputTypeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 changeInputTypeHandler();
@@ -83,15 +118,17 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void getRouteHandler() {
-        // find user's current location
-
-        // open maps page
-        Intent intent = new Intent(this, MapsActivity.class);
-        startActivity(intent);
 
         // get values
         readInputs();
-        Monitor.speedReporter();
+        speedReporter();
+
+        // open maps page
+        Intent intent = new Intent(this, MapsActivity.class);
+        intent.putExtra(Keys.DISTANCE, distance);
+        intent.putExtra(Keys.ACTIVITYTYPE, activity);
+
+        startActivity(intent);
 
     }
 
@@ -114,7 +151,7 @@ public class MainActivity extends AppCompatActivity {
 
         getRouteButton = (Button) findViewById(R.id.getRoute);
         changeLocationButton = (Button) findViewById(R.id.changeLocation);
-        inputType = (Button) findViewById(R.id.inputType);
+        inputTypeButton = (Button) findViewById(R.id.inputType);
 
         unit1 = (TextView) findViewById(R.id.unit1);
         unit2 = (TextView) findViewById(R.id.unit2);
@@ -131,47 +168,58 @@ public class MainActivity extends AppCompatActivity {
     public void changeInputTypeHandler(){
 
         readInputs();
-        Monitor.speedReporter();
+        speedReporter();
 
-        if (Data.inputType==2){
-            Data.inputType=1;
-            inputType.setText("TIME");
+        if (inputType==DISTANCE){
+            inputType=TIME;
+            inputTypeButton.setText("TIME");
             spinner1.setAdapter(hrAdapter);
             spinner2.setAdapter(minAdapter);
             unit1.setText("HR");
             unit2.setText("MIN");
-            spinner1.setSelection(Data.s1U1Position);
-            spinner2.setSelection(Data.s2U1Position);
+            spinner1.setSelection(s1U1Position);
+            spinner2.setSelection(s2U1Position);
 
         }else {
-            Data.inputType=2;
-            inputType.setText("DISTANCE");
+            inputType=DISTANCE;
+            inputTypeButton.setText("DISTANCE");
             spinner1.setAdapter(mileAdapter);
             spinner2.setAdapter(mileDeciAdapter);
             unit1.setText(" . ");
             unit2.setText("Km");
-            spinner1.setSelection(Data.s1U2Position);
-            spinner2.setSelection(Data.s2U2Position);
+            spinner1.setSelection(s1U2Position);
+            spinner2.setSelection(s2U2Position);
         }
     }
 
     private void readInputs(){
 
-        if (Data.inputType==1){
-            Data.s1U1Position=spinner1.getSelectedItemPosition();
-            Data.s2U1Position=spinner2.getSelectedItemPosition();
+        activity = activitySpinner.getSelectedItem().toString().toLowerCase();
+        // hours or km
+        unit1Value = Integer.parseInt(spinner1.getSelectedItem().toString());
+        // minutes or decimal km
+        unit2Value = Integer.parseInt(spinner2.getSelectedItem().toString());
+
+        if (inputType==TIME){
+            s1U1Position=spinner1.getSelectedItemPosition();
+            s2U1Position=spinner2.getSelectedItemPosition();
+            distance=Monitor.convertTimeToDistanceInMeters(unit1Value, unit2Value, activity);
         }else {
-            Data.s1U2Position = spinner1.getSelectedItemPosition();
-            Data.s2U2Position = spinner2.getSelectedItemPosition();
+            s1U2Position = spinner1.getSelectedItemPosition();
+            s2U2Position = spinner2.getSelectedItemPosition();
+            distance=Monitor.convertDistanceToMeters(unit1Value,unit2Value);
         }
 
-        Data.activity = activitySpinner.getSelectedItem().toString().toLowerCase();
-        Data.unit1Value = Integer.parseInt(spinner1.getSelectedItem().toString());
-        Data.unit2Value = Integer.parseInt(spinner2.getSelectedItem().toString());
 
-        Monitor.convertInput();
     }
 
+
+    public void speedReporter(){
+
+        Log.i(TAG,"Activity type: "+activity);
+        Log.i(TAG,"Estimated Distance to go: "+distance+" meters");
+
+    }
 
 
 }

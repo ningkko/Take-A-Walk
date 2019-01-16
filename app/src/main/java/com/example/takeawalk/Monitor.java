@@ -1,46 +1,45 @@
 package com.example.takeawalk;
 
-import android.util.Log;
-
 public class Monitor {
 
+
     /**
-     * get distance, time...
+     * time to distance
+     * @param hours
+     * @param minutes
+     * @param activity
+     * @return
      */
-    public static void convertInput(){
+    public static double convertTimeToDistanceInMeters(int hours, int minutes, String activity){
 
-        getDefaultSpeed();
-
-        if (Data.inputType==2){
-            Data.distance=Data.unit1Value+((double)Data.unit2Value)/10;
-            Data.time = (int)(Data.distance*1000/Data.speed/60);
-        }
-        else{
-            Data.time = Data.unit1Value*60+Data.unit2Value;
-            Data.distance = Data.speed*Data.time*60/1000;
-        }
+        // m/s
+        double speed = getDefaultSpeedInMetersPerSec(activity);
+        // time in seconds
+        double time = hours*60*60+minutes*60;
+        // distance in meters
+        return speed*time;
     }
 
-    //uniform speed
-    public static void getDefaultSpeed(){
+    public static int convertDistanceToMeters(int km, int decimalKm){
 
-        if (Data.activity.toLowerCase().equals("running")){
+        // distance in meters
+        return km*1000+decimalKm*100;
 
-            Data.speed=2.5;
-        }else if(Data.activity.toLowerCase().equals("walking")){
-            Data.speed=1.4;
+    }
+
+
+    public static double getDefaultSpeedInMetersPerSec(String activity){
+
+        if (activity.toLowerCase().equals("running")){
+            return 2.5;
+
+        }else if(activity.toLowerCase().equals("walking")){
+
+            return 1.4;
+
         }else{
-            Data.speed=5.36;
+            return 5.36;
         }
-    }
-
-    public static void speedReporter(){
-
-        Log.i(Data.TAG,"Activity type: "+Data.activity);
-        Log.i(Data.TAG,"Estimated Distance to go: "+Data.distance+" km");
-        Log.i(Data.TAG,"Will finish in: "+(int)(Data.time)+" minutes");
-        Log.i(Data.TAG,"Estimated speed: "+Data.speed+" m/s");
-
     }
 
     public static void upDateDistanceAndTime(){

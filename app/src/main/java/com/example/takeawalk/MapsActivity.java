@@ -36,6 +36,7 @@ import com.google.maps.model.TravelMode;
 import org.joda.time.DateTime;
 
 import java.io.IOException;
+import java.security.Key;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -62,10 +63,19 @@ public class MapsActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
     private static final String TAG = "print";
 
 
+    public double distance;
+    public String activityType;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
+
+        // retrive data from activity 1
+        Intent intent = getIntent();
+        distance = intent.getDoubleExtra(Keys.DISTANCE,0.0);
+        activityType = intent.getStringExtra(Keys.ACTIVITYTYPE);
 
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
@@ -96,7 +106,7 @@ public class MapsActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
                 // update the marker if location changes
                 // mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 12));
                 // get current user speed
-                Data.speed=location.getSpeedAccuracyMetersPerSecond();
+                // double speed=location.getSpeedAccuracyMetersPerSecond();
                 // report speed
                 //Monitor.speedReporter();
             }
