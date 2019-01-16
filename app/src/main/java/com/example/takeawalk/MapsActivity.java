@@ -38,6 +38,7 @@ import org.joda.time.DateTime;
 import java.io.IOException;
 import java.security.Key;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 public class MapsActivity extends AppCompatActivity implements GoogleMap.OnMyLocationButtonClickListener,
@@ -62,10 +63,10 @@ public class MapsActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
     private LocationListener locationListener;
     private static final String TAG = "print";
 
-
     public double distance;
     public String activityType;
 
+    private Random random = new Random();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -346,6 +347,63 @@ public class MapsActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
         }
     }
 
+
+    /**
+     * Gets a random point on a circle given center and radius of circle
+     * @param xOfCenter double, x coordinate of center of circle
+     * @param yOfCenter double, y coordinate of center of circle
+     * @param radius double, radius of circle in decimal degrees
+     * @return double array of size 2, x coordinate of point in first slot, y coordinate of point in second slot
+     */
+    private double[] findPointOnCircle(double xOfCenter, double yOfCenter, double radius){
+        // get a random theta value in range 0 to 2pi
+        double frac = random.nextDouble();
+        double theta = frac*2*Math.PI;
+
+        // get cartesian coordinates of point on circle (defined by randomly chosen theta and given radius)
+        double xOfPoint = xOfCenter + (radius*Math.cos(theta));
+        double yOfPoint = yOfCenter + (radius*Math.sin(theta));
+
+        double[] point = {xOfPoint, yOfPoint};
+
+        return point;
+    }
+
+
+    /**
+     * Gets two stops (B and C) which create a triangular route of approximately a certain distance, given a starting point and desired distance
+     * @param latitude double, latitude of starting point
+     * @param longitude double, longitude of starting point
+     * @param distanceMeters double, desired distance of route in meters
+     * @return 2 by 2 2D double array, latitude and longitude of B (first stop) in first row, latitude and longitude of C (second stop) in second row
+     */
+    private double[][] getTwoStops(double latitude, double longitude, double distanceMeters) {
+        double xOfA = longitude;
+        double yOfA = latitude;
+
+        // convert distance in meters to distance in decimal degrees (from https://stackoverflow.com/a/25237446)
+        double d = distanceMeters / (111.32 * 1000 * Math.cos(latitude * (Math.PI / 180)));
+
+        // pick a d1 in range d/(1+sqrt(2)) < d1 < d/2
+        double frac = random.nextDouble();
+        double lowRange = d/(1+Math.sqrt(2));
+        double d1 = lowRange + (frac*((d/2)-lowRange));
+
+        // find second point on route, B
+        double[] B = findPointOnCircle(xOfA, yOfA, d1);
+
+        // find midpoint of line from A to B
+        double xOfMidAB = (xOfA+B[0])/2;
+        double yOfMidAB = (yOfA+B[1])/2;
+
+        // find second point on route, C
+        double[] C = findPointOnCircle(xOfMidAB, yOfMidAB, (d1/2));
+
+        // return in order latitude, longitude for each of B and C
+        double[][] coordsOfBAndC = {{B[1],B[0]},{C[1],C[0]}};
+
+        return coordsOfBAndC;
+    }
 }
 
 
