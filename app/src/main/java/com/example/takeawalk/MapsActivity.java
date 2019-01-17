@@ -75,6 +75,8 @@ public class MapsActivity extends AppCompatActivity {
     private Location currentLocation;
     private String mode;
 
+    private Marker lastMarker = null;
+
     private static final String TAG = "print";
 
     public double distance;
@@ -340,24 +342,23 @@ public class MapsActivity extends AppCompatActivity {
             public void onMapClick(LatLng clickCoords) {
 
                 double inf = Double.POSITIVE_INFINITY;
-                Polyline p = null;
-                String t = null;
+                Pair<Polyline, String> pair = null;
                 for (int i = 0; i < results.size(); i++) {
 
-                    final String title = results.get(i).second;
+                    String title = results.get(i).second;
                     Polyline pl = results.get(i).first;
+                    pl.setZIndex(0);
                     pl.setColor(getColor(R.color.colorPrimary));
                     for (LatLng polyCoords : pl.getPoints()) {
 
-                        float[] results = new float[1];
+                        float[] result = new float[1];
                         Location.distanceBetween(clickCoords.latitude, clickCoords.longitude,
-                                polyCoords.latitude, polyCoords.longitude, results);
+                                polyCoords.latitude, polyCoords.longitude, result);
 
-                        if (results[0] < 1000) {
-                            if (inf > results[0]) {
-                                inf = results[0];
-                                p = pl;
-                                t = title;
+                        if (result[0] < 1000) {
+                            if (inf > result[0]) {
+                                inf = result[0];
+                                pair = results.get(i);
                             }
 
                         }
@@ -366,17 +367,24 @@ public class MapsActivity extends AppCompatActivity {
 
                 }
 
-                if (inf != Double.POSITIVE_INFINITY && p != null & t != null) {
+                if (inf != Double.POSITIVE_INFINITY && pair != null) {
                     Drawable tr = new ColorDrawable(Color.TRANSPARENT);
-                    p.setColor(Color.RED);
-                    Log.d(TAG, "Second change polyline " + p.toString() + " to blue");
+
+                    Log.d(TAG, "Second change polyline " + pair.first.toString() + " to blue");
                     //pl.setVisible(true);
-                    Marker marker = mMap.addMarker(new MarkerOptions()
-                            .position(new LatLng(clickCoords.latitude, clickCoords.longitude)).alpha(0).title(t));
 
+                    if (lastMarker != null) {
+                        lastMarker.remove();
+                    }
+                    lastMarker = mMap.addMarker(new MarkerOptions()
+                            .position(new LatLng(clickCoords.latitude, clickCoords.longitude)).alpha(0).title(pair.second));
+                    Log.d(TAG, "setting color");
+                    pair.first.setColor(Color.RED);
+                    pair.first.setZIndex(1);
 
+                    Log.d(TAG, "Polyline id " + pair.first.toString() + " title for such polyline is " + pair.second);
                     //open the marker's info window
-                    marker.showInfoWindow();
+                    lastMarker.showInfoWindow();
                     Log.e(TAG, "The second possible method @ " + clickCoords.latitude + " " + clickCoords.longitude);
 
                 }
