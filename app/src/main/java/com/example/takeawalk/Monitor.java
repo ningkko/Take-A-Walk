@@ -15,7 +15,7 @@ public class Monitor {
         // m/s
         double speed = getDefaultSpeedInMetersPerSec(activity);
         // time in seconds
-        double time = hours*60*60+minutes*60;
+        double time = (hours*60*60)+(minutes*60);
         // distance in meters
         return speed*time;
     }
