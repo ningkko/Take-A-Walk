@@ -237,6 +237,7 @@ public class MapsActivity extends AppCompatActivity {
      * switch back to mainActivity
      */
     public void reloadButtonHandler(){
+        mMap.clear();
         HashMap<String, double[]> routeMap = getRoute(currentLocation.getLatitude(), currentLocation.getLongitude(), distance);
         drawRoute(mMap, routeMap);
     }
