@@ -51,8 +51,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
-public class MapsActivity extends AppCompatActivity implements GoogleMap.OnMyLocationButtonClickListener,
-        GoogleMap.OnMyLocationClickListener, OnMapReadyCallback {
+public class MapsActivity extends AppCompatActivity {
 
     private GoogleMap mMap;
     private FloatingActionButton backButton;
@@ -81,6 +80,35 @@ public class MapsActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
 
     private Random random = new Random();
 
+    private GoogleMap.OnMyLocationButtonClickListener onMyLocationButtonClickListener = new GoogleMap.OnMyLocationButtonClickListener() {
+        @Override
+        public boolean onMyLocationButtonClick() {
+            Toast.makeText(MapsActivity.this, "Getting your current location", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+    };
+
+    private GoogleMap.OnMyLocationClickListener onMyLocationClickListener = new GoogleMap.OnMyLocationClickListener() {
+        @Override
+        public void onMyLocationClick(@NonNull Location location) {
+            String message = Double.toString(location.getLatitude())+", "+Double.toString(location.getLongitude());
+            Toast.makeText(MapsActivity.this, "Current location:\n" + message, Toast.LENGTH_LONG).show();
+        }
+    };
+
+    private OnMapReadyCallback onMapReadyCallback = new OnMapReadyCallback() {
+        @Override
+        public void onMapReady(GoogleMap googleMap) {
+            mMap = googleMap;
+
+            // Add a marker in Sydney and move the camera
+            mMap.setOnMyLocationButtonClickListener(onMyLocationButtonClickListener);
+            mMap.setOnMyLocationClickListener(onMyLocationClickListener);
+            enableMyLocation();
+            setupGoogleMapScreenSettings(googleMap);
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -95,7 +123,7 @@ public class MapsActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
+        mapFragment.getMapAsync(onMapReadyCallback);
 
 
         /**
@@ -211,16 +239,6 @@ public class MapsActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
         super.onResume();
     }
 
-    @Override
-    public void onMapReady(GoogleMap googleMap) {
-        mMap = googleMap;
-
-        // Add a marker in Sydney and move the camera
-        mMap.setOnMyLocationButtonClickListener(this);
-        mMap.setOnMyLocationClickListener(this);
-        enableMyLocation();
-        setupGoogleMapScreenSettings(googleMap);
-    }
 
     private void drawRoute(GoogleMap googleMap, HashMap<String, double[]> routeMap) throws NullPointerException{
         if (routeMap != null) {
@@ -388,18 +406,6 @@ public class MapsActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
         }
     }
 
-
-    @Override
-    public boolean onMyLocationButtonClick() {
-        Toast.makeText(this, "Getting your current location", Toast.LENGTH_SHORT).show();
-        return false;
-    }
-
-    @Override
-    public void onMyLocationClick(@NonNull Location location) {
-        String message = Double.toString(location.getLatitude())+", "+Double.toString(location.getLongitude());
-        Toast.makeText(this, "Current location:\n" + message, Toast.LENGTH_LONG).show();
-    }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
