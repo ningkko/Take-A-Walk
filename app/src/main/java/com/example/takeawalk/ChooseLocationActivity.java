@@ -29,7 +29,6 @@ public class ChooseLocationActivity extends AppCompatActivity{
      * location the user tapped, set to current location when initialized
      */
     public Location currentLocation = new Location(LocationManager.GPS_PROVIDER);
-    public Location previousLocation = new Location(LocationManager.GPS_PROVIDER);
 
     /**
      * the map we're using
@@ -55,9 +54,8 @@ public class ChooseLocationActivity extends AppCompatActivity{
         @Override
         public void onMapClick(LatLng latLng) {
 
-            // update previous location and current location
+            // current location
             if (latLng != null) {
-                previousLocation.set(currentLocation);
                 currentLocation.setLatitude(latLng.latitude);
                 currentLocation.setLongitude(latLng.longitude);
 
@@ -164,21 +162,9 @@ public class ChooseLocationActivity extends AppCompatActivity{
     }
 
 
-
+    // finish! with no changes of location!
     public void setCancelButton() {
-
-        // set current location back to previous location
-        currentLocation = previousLocation;
-        // generate its latitude and longitude
-        LatLng latLng = new LatLng(currentLocation.getLatitude(),currentLocation.getLatitude());
-
-        // initialize the marker
-        if (marker == null) {
-            marker = mMap.addMarker(new MarkerOptions().position(latLng));
-        }
-
-        // set the marker to a new position
-        marker.setPosition(latLng);
+        finish();
     }
 
 
@@ -186,7 +172,7 @@ public class ChooseLocationActivity extends AppCompatActivity{
 
         mMap.setBuildingsEnabled(true);
         mMap.setIndoorEnabled(true);
-        mMap.setTrafficEnabled(true);
+        mMap.setTrafficEnabled(false);
         UiSettings mUiSettings = mMap.getUiSettings();
         mUiSettings.setZoomControlsEnabled(true);
         mUiSettings.setCompassEnabled(true);

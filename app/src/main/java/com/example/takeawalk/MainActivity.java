@@ -138,14 +138,20 @@ public class MainActivity extends AppCompatActivity {
 
         // input cannot be 0
         if (distance==0){
-            Toast.makeText(this, "Distance can't be 0", Toast.LENGTH_SHORT).show();
+
+            Toast.makeText(this, "Hi, distance can't be 0! :D", Toast.LENGTH_SHORT).show();
 
         }else{
-            // open maps page
+
             Intent intent = new Intent(this, MapsActivity.class);
+
+            // store distance, activity type, start longitude and latitude
             intent.putExtra(Keys.DISTANCE, distance);
             intent.putExtra(Keys.ACTIVITYTYPE, activity);
+            intent.putExtra(Keys.STARTLATITUDE,startLatitude);
+            intent.putExtra(Keys.STARTLONGITUDE,startLongitude);
 
+            // open maps page
             startActivity(intent);
         }
 
@@ -266,4 +272,5 @@ public class MainActivity extends AppCompatActivity {
     }
 
 }
+
 
