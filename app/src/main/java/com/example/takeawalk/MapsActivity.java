@@ -345,6 +345,7 @@ public class MapsActivity extends AppCompatActivity {
 
                     final String title = results.get(i).second;
                     Polyline pl = results.get(i).first;
+                    pl.setColor(getColor(R.color.colorPrimary));
                     for (LatLng polyCoords : pl.getPoints()) {
 
                         float[] results = new float[1];
