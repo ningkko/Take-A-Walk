@@ -225,7 +225,6 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-
     public void speedReporter(){
 
         Log.i(TAG,"Activity type: "+activity);
