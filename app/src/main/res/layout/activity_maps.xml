@@ -16,7 +16,7 @@
         tools:context=".MapsActivity" />
 
     <android.support.design.widget.FloatingActionButton
-        android:id="@+id/more"
+        android:id="@+id/back"
         android:layout_width="67dp"
         android:layout_height="wrap_content"
         android:clickable="true"
@@ -24,7 +24,20 @@
         android:layout_gravity="bottom|start"
         android:layout_marginStart="16dp"
         android:layout_marginBottom="32dp"
-        android:src="@drawable/ic_arrow_back_black_24dp"
+        android:src="@drawable/ic_arrow_back_white_24dp"
+        app:fabSize="mini"
+        app:backgroundTint="@color/colorPrimary" />
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/reload"
+        android:layout_width="67dp"
+        android:layout_height="wrap_content"
+        android:clickable="true"
+        android:focusable="true"
+        android:layout_gravity="bottom|start"
+        android:layout_marginStart="16dp"
+        android:layout_marginBottom="78dp"
+        android:src="@drawable/ic_refresh_white_24dp"
         app:fabSize="mini"
         app:backgroundTint="@color/colorPrimary" />
 

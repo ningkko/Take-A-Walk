@@ -55,6 +55,8 @@ public class MapsActivity extends AppCompatActivity {
 
     private GoogleMap mMap;
     private FloatingActionButton backButton;
+    private FloatingActionButton reloadButton;
+
 
     private boolean mPermissionDenied = false;
     private static final int overview = 0;
@@ -127,13 +129,26 @@ public class MapsActivity extends AppCompatActivity {
 
 
         /**
-         * go back to the input page
+         * set up back button
          */
-        backButton = findViewById(R.id.more);
+        backButton = findViewById(R.id.back);
         backButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                BackButtonHandler();
+                backButtonHandler();
+            }
+        });
+
+        /**
+         * set up reload button
+         */
+        reloadButton = findViewById(R.id.reload);
+        reloadButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (currentLocation != null) {
+                    reloadButtonHandler();
+                }
             }
         });
 
@@ -146,10 +161,9 @@ public class MapsActivity extends AppCompatActivity {
 
             @Override
             public void onLocationChanged(Location location) {
-                //Log.d(TAG, "location changed");
                 if (currentLocation == null) {
                     currentLocation = location;
-                    HashMap<String, double[]> routeMap = getRoutePoints(currentLocation.getLatitude(), currentLocation.getLongitude(), distance);
+                    HashMap<String, double[]> routeMap = getRoute(currentLocation.getLatitude(), currentLocation.getLongitude(), distance);
                     drawRoute(mMap, routeMap);
                 }
 
@@ -212,12 +226,19 @@ public class MapsActivity extends AppCompatActivity {
 
 
     /**
-     * switch back to mainActivity rather than just "go back"
+     * switch back to mainActivity
      */
-    public void BackButtonHandler(){
-
+    public void backButtonHandler(){
         Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);
+    }
+
+    /**
+     * switch back to mainActivity
+     */
+    public void reloadButtonHandler(){
+        HashMap<String, double[]> routeMap = getRoute(currentLocation.getLatitude(), currentLocation.getLongitude(), distance);
+        drawRoute(mMap, routeMap);
     }
 
     private void setupGoogleMapScreenSettings(GoogleMap mMap) {
@@ -324,7 +345,6 @@ public class MapsActivity extends AppCompatActivity {
 
                     final String title = results.get(i).second;
                     Polyline pl = results.get(i).first;
-                    pl.setColor(Color.RED);
                     for (LatLng polyCoords : pl.getPoints()) {
 
                         float[] results = new float[1];
@@ -346,14 +366,14 @@ public class MapsActivity extends AppCompatActivity {
 
                 if (inf != Double.POSITIVE_INFINITY && p != null & t != null) {
                     Drawable tr = new ColorDrawable(Color.TRANSPARENT);
-                    p.setColor(Color.BLUE);
+                    p.setColor(Color.RED);
                     Log.d(TAG, "Second change polyline " + p.toString() + " to blue");
                     //pl.setVisible(true);
                     Marker marker = mMap.addMarker(new MarkerOptions()
                             .position(new LatLng(clickCoords.latitude, clickCoords.longitude)).alpha(0).title(t));
 
 
-//open the marker's info window
+                    //open the marker's info window
                     marker.showInfoWindow();
                     Log.e(TAG, "The second possible method @ " + clickCoords.latitude + " " + clickCoords.longitude);
 
@@ -507,7 +527,7 @@ public class MapsActivity extends AppCompatActivity {
      * @param distanceMeters double, desired distance of route in meters
      * @return hashmap with string keys and double array values, key is "A", "B", or "C", and values are [latitude, longitude] of the point in an array of size 2
      */
-    private HashMap<String, double[]> getRoutePoints(double latitude, double longitude, double distanceMeters) {
+    private HashMap<String, double[]> getRoute(double latitude, double longitude, double distanceMeters) {
         HashMap<String, double[]> coordsMap = new HashMap<>();
 
         // rename as x and y for clarity/consistency
