@@ -52,7 +52,7 @@ import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 public class MapsActivity extends AppCompatActivity implements GoogleMap.OnMyLocationButtonClickListener,
-        GoogleMap.OnMyLocationClickListener,OnMapReadyCallback {
+        GoogleMap.OnMyLocationClickListener, OnMapReadyCallback {
 
     private GoogleMap mMap;
     private FloatingActionButton backButton;
@@ -88,7 +88,7 @@ public class MapsActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
 
         // retrive data from activity 1
         Intent intent = getIntent();
-        distance = intent.getDoubleExtra(Keys.DISTANCE,0.0);
+        distance = intent.getDoubleExtra(Keys.DISTANCE, 0.0);
         mode = intent.getStringExtra(Keys.ACTIVITYTYPE);
         activityType = intent.getStringExtra(Keys.ACTIVITYTYPE);
 
@@ -149,11 +149,21 @@ public class MapsActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
     }
 
 
-    public void checkPermission(){
+    public void checkPermission() {
 
         // if apk smaller than 23, no need for checking permission
-        if (Build.VERSION.SDK_INT<23){
+        if (Build.VERSION.SDK_INT < 23) {
 
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                // TODO: Consider calling
+                //    ActivityCompat#requestPermissions
+                // here to request the missing permissions, and then overriding
+                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                //                                          int[] grantResults)
+                // to handle the case where the user grants the permission. See the documentation
+                // for ActivityCompat#requestPermissions for more details.
+                return;
+            }
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
 
         }else{
