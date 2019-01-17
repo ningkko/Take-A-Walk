@@ -54,6 +54,10 @@ import java.util.concurrent.TimeUnit;
 public class MapsActivity extends AppCompatActivity {
 
     private GoogleMap mMap;
+
+    private double startLatitude = Double.MIN_EXPONENT;
+    private double startLongitude = Double.MIN_EXPONENT;
+
     private FloatingActionButton backButton;
     private FloatingActionButton reloadButton;
 
@@ -75,12 +79,12 @@ public class MapsActivity extends AppCompatActivity {
     private Location currentLocation;
     private String mode;
 
+    private Marker lastMarker = null;
+
     private static final String TAG = "print";
 
     public double distance;
     public String activityType;
-    double startLatitude;
-    double startLongitude;
 
     private Random random = new Random();
 
@@ -124,6 +128,12 @@ public class MapsActivity extends AppCompatActivity {
         mode = intent.getStringExtra(Keys.ACTIVITYTYPE);
         activityType = intent.getStringExtra(Keys.ACTIVITYTYPE);
 
+        if (intent.getStringExtra(Keys.LOCATION_CHANGE).equals("true")) {
+            Log.d(TAG, "get location is enabled");
+            startLatitude = intent.getDoubleExtra(Keys.STARTLATITUDE, 0.0);
+            startLongitude = intent.getDoubleExtra(Keys.STARTLONGITUDE, 0.0);
+        }
+
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
@@ -163,13 +173,28 @@ public class MapsActivity extends AppCompatActivity {
 
             @Override
             public void onLocationChanged(Location location) {
+//
                 if (currentLocation == null) {
-                    currentLocation = location;
+                    if (startLatitude != Double.MIN_EXPONENT & startLongitude != Double.MIN_EXPONENT) {
+                        Location newL = new Location("");
+                        newL.setLatitude(startLatitude);
+                        newL.setLongitude(startLongitude);
+                        currentLocation = newL;
+                    } else {
+                        currentLocation = location;
+                    }
                     HashMap<String, double[]> routeMap = getRoute(currentLocation.getLatitude(), currentLocation.getLongitude(), distance);
                     drawRoute(mMap, routeMap);
                 }
 
-                currentLocation = location;
+                if (startLatitude != Double.MIN_EXPONENT & startLongitude != Double.MIN_EXPONENT) {
+                    Location newL = new Location("");
+                    newL.setLatitude(startLatitude);
+                    newL.setLongitude(startLongitude);
+                    currentLocation = newL;
+                } else {
+                    currentLocation = location;
+                }
             }
 
             @Override
@@ -190,12 +215,6 @@ public class MapsActivity extends AppCompatActivity {
 
         // checks if have user permission for getting current locations
         checkPermission();
-
-
-        Toast.makeText(MapsActivity.this, "Your start location: ("+
-                        String.format("%.2f", startLatitude)+ ", "+
-                        String.format("%.2f", startLongitude)+ ")",
-                Toast.LENGTH_SHORT).show();
     }
 
 
@@ -348,24 +367,23 @@ public class MapsActivity extends AppCompatActivity {
             public void onMapClick(LatLng clickCoords) {
 
                 double inf = Double.POSITIVE_INFINITY;
-                Polyline p = null;
-                String t = null;
+                Pair<Polyline, String> pair = null;
                 for (int i = 0; i < results.size(); i++) {
 
-                    final String title = results.get(i).second;
+                    String title = results.get(i).second;
                     Polyline pl = results.get(i).first;
+                    pl.setZIndex(0);
                     pl.setColor(getColor(R.color.colorPrimary));
                     for (LatLng polyCoords : pl.getPoints()) {
 
-                        float[] results = new float[1];
+                        float[] result = new float[1];
                         Location.distanceBetween(clickCoords.latitude, clickCoords.longitude,
-                                polyCoords.latitude, polyCoords.longitude, results);
+                                polyCoords.latitude, polyCoords.longitude, result);
 
-                        if (results[0] < 1000) {
-                            if (inf > results[0]) {
-                                inf = results[0];
-                                p = pl;
-                                t = title;
+                        if (result[0] < 1000) {
+                            if (inf > result[0]) {
+                                inf = result[0];
+                                pair = results.get(i);
                             }
 
                         }
@@ -374,17 +392,24 @@ public class MapsActivity extends AppCompatActivity {
 
                 }
 
-                if (inf != Double.POSITIVE_INFINITY && p != null & t != null) {
+                if (inf != Double.POSITIVE_INFINITY && pair != null) {
                     Drawable tr = new ColorDrawable(Color.TRANSPARENT);
-                    p.setColor(Color.RED);
-                    Log.d(TAG, "Second change polyline " + p.toString() + " to blue");
+
+                    Log.d(TAG, "Second change polyline " + pair.first.toString() + " to blue");
                     //pl.setVisible(true);
-                    Marker marker = mMap.addMarker(new MarkerOptions()
-                            .position(new LatLng(clickCoords.latitude, clickCoords.longitude)).alpha(0).title(t));
 
+                    if (lastMarker != null) {
+                        lastMarker.remove();
+                    }
+                    lastMarker = mMap.addMarker(new MarkerOptions()
+                            .position(new LatLng(clickCoords.latitude, clickCoords.longitude)).alpha(0).title(pair.second));
+                    Log.d(TAG, "setting color");
+                    pair.first.setColor(Color.RED);
+                    pair.first.setZIndex(1);
 
+                    Log.d(TAG, "Polyline id " + pair.first.toString() + " title for such polyline is " + pair.second);
                     //open the marker's info window
-                    marker.showInfoWindow();
+                    lastMarker.showInfoWindow();
                     Log.e(TAG, "The second possible method @ " + clickCoords.latitude + " " + clickCoords.longitude);
 
                 }
@@ -571,23 +596,4 @@ public class MapsActivity extends AppCompatActivity {
 
         return coordsMap;
     }
-
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-
-
-        if (requestCode == Keys.REQUEST_STARTLOCATION_MAPS) {
-
-            if (resultCode == RESULT_OK) {
-                startLatitude = data.getDoubleExtra(Keys.STARTLATITUDE,0.0);
-                startLongitude = data.getDoubleExtra(Keys.STARTLONGITUDE,0.0);
-            }
-        }
-
-        super.onActivityResult(requestCode, resultCode, data);
-
-
-    }
-
 }

@@ -2,7 +2,6 @@ package com.example.takeawalk;
 
 import android.content.Intent;
 import android.location.Location;
-import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -17,6 +16,8 @@ public class MainActivity extends AppCompatActivity {
 
 
     private static final String TAG = "PRINT";
+
+    private static String startLocationChanged = "false";
 
     /**
      * activitySpinner ::= walking, biking
@@ -86,7 +87,6 @@ public class MainActivity extends AppCompatActivity {
 
     public double distance=0;
 
-    public Location currentLocation = new Location(LocationManager.GPS_PROVIDER);
     public double startLatitude;
     public double startLongitude;
 
@@ -96,6 +96,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         initialize();
+        startLocationChanged = "false";
+
 
         // Specify the layout to use when the list of choices appears
         activityAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -106,6 +108,7 @@ public class MainActivity extends AppCompatActivity {
         spinner1.setAdapter(hrAdapter);
         spinner2.setAdapter(minAdapter);
 
+        startLocationLabel.setText("Current location");
 
         // register listener for get route button
         getRouteButton.setOnClickListener(new View.OnClickListener() {
@@ -127,13 +130,6 @@ public class MainActivity extends AppCompatActivity {
                 changeInputTypeHandler();
             }
         });
-
-        startLocationLabel.setText("Current location: ("+
-                String.format("%.2f", currentLocation
-                        .getLatitude())
-                +", "
-                +String.format("%.2f", currentLocation.getLongitude())
-                +")");
 
     }
 
@@ -157,6 +153,8 @@ public class MainActivity extends AppCompatActivity {
             intent.putExtra(Keys.ACTIVITYTYPE, activity);
             intent.putExtra(Keys.STARTLATITUDE,startLatitude);
             intent.putExtra(Keys.STARTLONGITUDE,startLongitude);
+            Log.d(TAG, "location change is " + startLocationChanged);
+            intent.putExtra(Keys.LOCATION_CHANGE, startLocationChanged);
 
             // open maps page
             startActivity(intent);
@@ -167,16 +165,18 @@ public class MainActivity extends AppCompatActivity {
     public void changeLocationHandler(){
 
         Intent intent = new Intent(this, ChooseLocationActivity.class);
-        startActivityForResult(intent,Keys.REQUEST_STARTLOCATION_MAIN);
+        startActivityForResult(intent,Keys.REQUEST_STARTLOCATION);
 
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == Keys.REQUEST_STARTLOCATION_MAIN) {
+        if (requestCode == Keys.REQUEST_STARTLOCATION) {
             if (resultCode == RESULT_OK) {
-                startLatitude = data.getDoubleExtra(Keys.STARTLATITUDE,startLatitude);
-                startLongitude = data.getDoubleExtra(Keys.STARTLONGITUDE,startLatitude);
+                startLocationChanged = "true";
+                Log.d(TAG, "start location change is " + startLocationChanged);
+                startLatitude = data.getDoubleExtra(Keys.STARTLATITUDE,0.0);
+                startLongitude = data.getDoubleExtra(Keys.STARTLONGITUDE,0.0);
             }
         }
 
@@ -215,7 +215,8 @@ public class MainActivity extends AppCompatActivity {
         unit2 = (TextView) findViewById(R.id.unit2);
 
         startLocationLabel = (TextView) findViewById(R.id.startPositionLabel);
-        }
+
+    }
 
 
     /**
@@ -278,5 +279,3 @@ public class MainActivity extends AppCompatActivity {
     }
 
 }
-
-
