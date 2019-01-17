@@ -234,7 +234,7 @@ public class MapsActivity extends AppCompatActivity {
     }
 
     /**
-     * switch back to mainActivity
+     * clear old route and generate a new one
      */
     public void reloadButtonHandler(){
         mMap.clear();
