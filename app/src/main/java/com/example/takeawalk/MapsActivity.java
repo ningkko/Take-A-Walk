@@ -303,7 +303,7 @@ public class MapsActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
                         Location.distanceBetween(clickCoords.latitude, clickCoords.longitude,
                                 polyCoords.latitude, polyCoords.longitude, results);
 
-                        if (results[0] < 10000) {
+                        if (results[0] < 1000) {
                             if (inf > results[0]) {
                                 inf = results[0];
                                 p = pl;

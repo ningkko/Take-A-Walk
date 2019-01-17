@@ -9,6 +9,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -57,7 +58,7 @@ public class MainActivity extends AppCompatActivity {
     private static final int TIME = 1;
     private static final int DISTANCE = 2;
 
-    public int inputType = DISTANCE;
+    public int inputType = TIME;
     public String activity = "walking";
     public int unit1Value, unit2Value = 0;
 
@@ -130,12 +131,18 @@ public class MainActivity extends AppCompatActivity {
         readInputs();
         speedReporter();
 
-        // open maps page
-        Intent intent = new Intent(this, MapsActivity.class);
-        intent.putExtra(Keys.DISTANCE, distance);
-        intent.putExtra(Keys.ACTIVITYTYPE, activity);
+        // input cannot be 0
+        if (distance==0){
+            Toast.makeText(this, "Distance can't be 0", Toast.LENGTH_SHORT).show();
 
-        startActivity(intent);
+        }else{
+            // open maps page
+            Intent intent = new Intent(this, MapsActivity.class);
+            intent.putExtra(Keys.DISTANCE, distance);
+            intent.putExtra(Keys.ACTIVITYTYPE, activity);
+
+            startActivity(intent);
+        }
 
     }
 
@@ -169,7 +176,6 @@ public class MainActivity extends AppCompatActivity {
         unit2 = (TextView) findViewById(R.id.unit2);
 
         startLocationLabel = (TextView) findViewById(R.id.startPositionLabel);
-
 
     }
 
@@ -225,6 +231,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+
     public void speedReporter(){
 
         Log.i(TAG,"Activity type: "+activity);
@@ -232,5 +239,5 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-
 }
+
