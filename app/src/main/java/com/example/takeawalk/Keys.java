@@ -6,4 +6,5 @@ public class Keys {
 
     public static final String ACTIVITYTYPE = "ACTIVITYTYPE";
 
+    public static final String STARTLOCATION = "STARTLOCATION";
 }
