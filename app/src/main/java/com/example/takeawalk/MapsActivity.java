@@ -79,6 +79,8 @@ public class MapsActivity extends AppCompatActivity {
 
     public double distance;
     public String activityType;
+    double startLatitude;
+    double startLongitude;
 
     private Random random = new Random();
 
@@ -188,6 +190,12 @@ public class MapsActivity extends AppCompatActivity {
 
         // checks if have user permission for getting current locations
         checkPermission();
+
+
+        Toast.makeText(MapsActivity.this, "Your start location: ("+
+                        String.format("%.2f", startLatitude)+ ", "+
+                        String.format("%.2f", startLongitude)+ ")",
+                Toast.LENGTH_SHORT).show();
     }
 
 
@@ -234,9 +242,10 @@ public class MapsActivity extends AppCompatActivity {
     }
 
     /**
-     * switch back to mainActivity
+     * clear old route and generate a new one
      */
     public void reloadButtonHandler(){
+        mMap.clear();
         HashMap<String, double[]> routeMap = getRoute(currentLocation.getLatitude(), currentLocation.getLongitude(), distance);
         drawRoute(mMap, routeMap);
     }
@@ -562,7 +571,23 @@ public class MapsActivity extends AppCompatActivity {
 
         return coordsMap;
     }
+
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+
+        if (requestCode == Keys.REQUEST_STARTLOCATION_MAPS) {
+
+            if (resultCode == RESULT_OK) {
+                startLatitude = data.getDoubleExtra(Keys.STARTLATITUDE,0.0);
+                startLongitude = data.getDoubleExtra(Keys.STARTLONGITUDE,0.0);
+            }
+        }
+
+        super.onActivityResult(requestCode, resultCode, data);
+
+
+    }
+
 }
-
-
-

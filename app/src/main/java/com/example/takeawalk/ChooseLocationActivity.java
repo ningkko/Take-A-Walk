@@ -23,8 +23,6 @@ public class ChooseLocationActivity extends AppCompatActivity{
 
     private Button doneButton, cancelButton;
 
-    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
-
     /**
      * location the user tapped, set to current location when initialized
      */
@@ -83,11 +81,8 @@ public class ChooseLocationActivity extends AppCompatActivity{
                 Toast.makeText(ChooseLocationActivity.this,
                         "CANNOT FIND LOCATION INFO",
                         Toast.LENGTH_SHORT).show();
-
             }
         }
-
-
     };
 
 
@@ -95,7 +90,8 @@ public class ChooseLocationActivity extends AppCompatActivity{
     private GoogleMap.OnMyLocationClickListener onMyLocationClickListener = new GoogleMap.OnMyLocationClickListener() {
         @Override
         public void onMyLocationClick(@NonNull Location location) {
-            String message = Double.toString(location.getLatitude())+", "+Double.toString(location.getLongitude());
+            String message = Double.toString(location.getLatitude())+", "+
+                    Double.toString(location.getLongitude());
 
             Log.i("PRINT","MESSAGE:  "+ message);
             Toast.makeText(ChooseLocationActivity.this, "Current location:\n" + message, Toast.LENGTH_LONG).show();
@@ -123,7 +119,7 @@ public class ChooseLocationActivity extends AppCompatActivity{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_choose_location);
 
-
+        Log.i("PRINT","==="+currentLocation.getLatitude()+", "+currentLocation.getLatitude());
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.chooseLocationMap);
         mapFragment.getMapAsync(onMapReadyCallback);
@@ -150,13 +146,18 @@ public class ChooseLocationActivity extends AppCompatActivity{
 
     public void setDoneButton() {
 
-        Intent intent = new Intent(this, MainActivity.class);
+        Intent toMainActivityIntent = new Intent(this, MainActivity.class);
+
+        Intent toMapsIntent = new Intent(this,MapsActivity.class);
 
         // store latitude and longitude of the start position user selected
-        intent.putExtra(Keys.STARTLATITUDE, currentLocation.getLatitude());
-        intent.putExtra(Keys.STARTLONGITUDE, currentLocation.getLongitude());
+        toMainActivityIntent.putExtra(Keys.STARTLATITUDE, currentLocation.getLatitude());
+        toMainActivityIntent.putExtra(Keys.STARTLONGITUDE, currentLocation.getLongitude());
 
-        setResult(RESULT_OK,intent);
+        toMapsIntent.putExtra(Keys.STARTLATITUDE,currentLocation.getLatitude());
+        toMapsIntent.putExtra(Keys.STARTLONGITUDE,currentLocation.getLongitude());
+
+        setResult(RESULT_OK,toMainActivityIntent);
         finish();
 
     }
