@@ -486,13 +486,11 @@ public class MapsActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
         // convert distance in meters to distance in decimal degrees (from https://stackoverflow.com/a/25237446)
         double d = distanceMeters / (111.32 * 1000 * Math.cos(latitude * (Math.PI / 180)));
 
-        // pick a d1 in range d/(1+sqrt(2)) < d1 < d/2
-        double frac = random.nextDouble();
-        double lowRange = d/(1+Math.sqrt(2));
-        double d1 = lowRange + (frac*((d/2)-lowRange));
+        // adjust distance down to account for 3 legs of trip and indirectness of streets
+        double d1 = (d/5);
 
         // choose a random angle for point B
-        frac = random.nextDouble();
+        double frac = random.nextDouble();
         double theta = frac*2*Math.PI;
 
         // find second point on route, B
