@@ -184,7 +184,6 @@ public class MapsActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
 
         mMap.setBuildingsEnabled(true);
         mMap.setIndoorEnabled(true);
-        mMap.setTrafficEnabled(true);
         UiSettings mUiSettings = mMap.getUiSettings();
         mUiSettings.setZoomControlsEnabled(true);
         mUiSettings.setCompassEnabled(true);
@@ -209,10 +208,6 @@ public class MapsActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
         mMap.setOnMyLocationClickListener(this);
         enableMyLocation();
         setupGoogleMapScreenSettings(googleMap);
-
-
-
-
     }
 
     private void drawRoute(GoogleMap googleMap, HashMap<String, double[]> routeMap) throws NullPointerException{
@@ -456,17 +451,14 @@ public class MapsActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
 
 
     /**
-     * Gets a random point on a circle given center and radius of circle
+     * Gets latitude and longitude of a point on a circle given center of circle and polar coordinates of the point
      * @param xOfCenter double, x coordinate of center of circle
      * @param yOfCenter double, y coordinate of center of circle
      * @param radius double, radius of circle in decimal degrees
+     * @param theta double, angle point should be at
      * @return double array of size 2, y coordinate of point in first slot, x coordinate of point in second slot
      */
-    private double[] findPointOnCircle(double xOfCenter, double yOfCenter, double radius){
-        // get a random theta value in range 0 to 2pi
-        double frac = random.nextDouble();
-        double theta = frac*2*Math.PI;
-
+    private double[] findPointOnCircle(double xOfCenter, double yOfCenter, double radius, double theta) {
         // get cartesian coordinates of point on circle (defined by randomly chosen theta and given radius)
         double xOfPoint = xOfCenter + (radius*Math.cos(theta));
         double yOfPoint = yOfCenter + (radius*Math.sin(theta));
@@ -499,15 +491,18 @@ public class MapsActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
         double lowRange = d/(1+Math.sqrt(2));
         double d1 = lowRange + (frac*((d/2)-lowRange));
 
+        // choose a random angle for point B
+        frac = random.nextDouble();
+        double theta = frac*2*Math.PI;
+
         // find second point on route, B
-        double[] B = findPointOnCircle(xOfA, yOfA, d1);
+        double[] B = findPointOnCircle(xOfA, yOfA, d1, theta);
 
-        // find midpoint of line from A to B
-        double xOfMidAB = (xOfA+B[1])/2;
-        double yOfMidAB = (yOfA+B[0])/2;
+        // find 90 degrees from point B for placement of point C
+        theta = theta + (Math.PI/2);
 
-        // find second point on route, C
-        double[] C = findPointOnCircle(xOfMidAB, yOfMidAB, (d1/2));
+        // find third point on route, C
+        double[] C = findPointOnCircle(xOfA, yOfA, d1, theta);
 
         // put latitudes and longitudes for each stop in map
         double[] coordsOfA = {latitude, longitude};
