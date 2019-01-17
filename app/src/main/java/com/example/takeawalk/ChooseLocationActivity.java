@@ -65,7 +65,7 @@ public class ChooseLocationActivity extends AppCompatActivity{
 
                 // show message
                 Toast.makeText(ChooseLocationActivity.this,
-                        "( " + latitude + " , " + longitude + " )",
+                        "Location set to\n( " + latitude + " , " + longitude + " )",
                         Toast.LENGTH_LONG).show();
 
                 // initialize the marker
