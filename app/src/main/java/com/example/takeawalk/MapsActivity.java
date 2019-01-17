@@ -19,6 +19,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.util.Pair;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -40,6 +41,7 @@ import com.google.maps.model.DirectionsRoute;
 import com.google.maps.model.TravelMode;
 
 import org.joda.time.DateTime;
+import org.w3c.dom.Text;
 
 import java.io.IOException;
 import java.security.Key;
@@ -238,9 +240,16 @@ public class MapsActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
 
             Log.d(TAG, "current location is null");
             Log.d(TAG, "direction result is " + dr1);
+
+            // keep track of total distance and total time
+            double totalDistance = 0;
+            double totalTimeSec = 0;
+
             for (int i = 0; i < polylines.size(); i++) {
                 DirectionsResult dr = polylines.get(i);
                 if (dr != null) {
+                    totalDistance += polylines.get(i).routes[0].legs[0].distance.inMeters;
+                    totalTimeSec += polylines.get(i).routes[0].legs[0].duration.inSeconds;
                     positionCamera(dr.routes[overview], googleMap);
                     addMarkersToMap(dr, googleMap);
                 }
@@ -248,7 +257,30 @@ public class MapsActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
 
             ArrayList<Pair<Polyline, String>> polys = addPolyline(polylines, googleMap);
             mapListener(polys, mMap);
+
+            // display total distance and time for route
+            TextView infoWindow = (TextView) findViewById(R.id.info);
+            int totalTimeHr = (int)(totalTimeSec/3600);
+            int totalTimeMin = (int)((totalTimeSec/60)%60);
+            infoWindow.setText("Total distance: "+String.valueOf((int)totalDistance)+"m"+"\nTotal time: "+totalTimeHr+"hr "+totalTimeMin+"min");
         }
+    }
+
+    private ArrayList<Pair<Polyline, String>> addPolyline(ArrayList<DirectionsResult> results, final GoogleMap mMap) {
+        ArrayList<Pair<Polyline, String>> polylines = new ArrayList<>();
+        for (DirectionsResult result:results) {
+            List<LatLng> decodedPath = PolyUtil.decode(result.routes[overview].overviewPolyline.getEncodedPath());
+            Polyline pl = mMap.addPolyline(new PolylineOptions().addAll(decodedPath).color(Color.RED).width(10));
+
+            String time = result.routes[0].legs[0].duration.humanReadable;
+            String distance = Long.toString(result.routes[0].legs[0].distance.inMeters);
+
+            String title = "Distance: " + distance + " meters; Time: " + time;
+
+            polylines.add(Pair.create(pl, title));
+
+        }
+        return polylines;
     }
 
     public void mapListener(final ArrayList<Pair<Polyline, String>> results, final GoogleMap mMap) {
@@ -307,23 +339,6 @@ public class MapsActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
 
     private void positionCamera(DirectionsRoute route, GoogleMap mMap) {
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(route.legs[overview].startLocation.lat, route.legs[overview].startLocation.lng), 12));
-    }
-
-    private ArrayList<Pair<Polyline, String>> addPolyline(ArrayList<DirectionsResult> results, final GoogleMap mMap) {
-        ArrayList<Pair<Polyline, String>> polylines = new ArrayList<>();
-        for (DirectionsResult result:results) {
-            List<LatLng> decodedPath = PolyUtil.decode(result.routes[overview].overviewPolyline.getEncodedPath());
-            Polyline pl = mMap.addPolyline(new PolylineOptions().addAll(decodedPath).color(Color.RED).width(10));
-
-            String time = result.routes[0].legs[0].duration.humanReadable;
-            String distance = Long.toString(result.routes[0].legs[0].distance.inMeters);
-
-            String title = "Distance: " + distance + " meters; Time: " + time;
-
-            polylines.add(Pair.create(pl, title));
-
-        }
-        return polylines;
     }
 
     private void addMarkersToMap(DirectionsResult results, GoogleMap mMap) {
