@@ -21,42 +21,74 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 public class ChooseLocationActivity extends AppCompatActivity{
 
-    private Button doneButton, cancelButton,getCurrentLocationButton;
+    private Button doneButton, cancelButton;
 
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
 
     /**
-     * location the user tapped
+     * location the user tapped, set to current location when initialized
      */
-    public Location currentLocation;
+    public Location currentLocation = new Location(LocationManager.GPS_PROVIDER);
+    public Location previousLocation = new Location(LocationManager.GPS_PROVIDER);
 
-    public LocationManager locationManager;
-    public Location previousLocation;
-
-    private static final int overview = 0;
-
+    /**
+     * the map we're using
+     */
     private GoogleMap mMap;
 
+    /**
+     * marker on the map
+     */
     private Marker marker=null;
 
+
+    private GoogleMap.OnMyLocationButtonClickListener onMyLocationButtonClickListener = new GoogleMap.OnMyLocationButtonClickListener() {
+        @Override
+        public boolean onMyLocationButtonClick() {
+            //show message
+            Toast.makeText(ChooseLocationActivity.this, "Getting your current location", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+    };
 
     private GoogleMap.OnMapClickListener onMapClickListener = new GoogleMap.OnMapClickListener() {
         @Override
         public void onMapClick(LatLng latLng) {
 
-            String latitude = String.format("%.2f",latLng.latitude);
-            String longitude = String.format("%.2f",latLng.longitude);
+            // update previous location and current location
+            if (latLng != null) {
+                previousLocation.set(currentLocation);
+                currentLocation.setLatitude(latLng.latitude);
+                currentLocation.setLongitude(latLng.longitude);
 
-            Toast.makeText(ChooseLocationActivity.this,
-                    latitude + " : " + longitude,
-                    Toast.LENGTH_LONG).show();
+                // round the latitude and longitude
+                String latitude = String.format("%.2f", latLng.latitude);
+                String longitude = String.format("%.2f", latLng.longitude);
 
-            if (marker!=null) {
-                marker.remove();
+                // show message
+                Toast.makeText(ChooseLocationActivity.this,
+                        "( " + latitude + " , " + longitude + " )",
+                        Toast.LENGTH_LONG).show();
+
+                // initialize the marker
+                if (marker == null) {
+                    marker = mMap.addMarker(new MarkerOptions().position(latLng));
+                }
+
+                // set the marker to a new position
+                marker.setPosition(latLng);
             }
-            //Add marker on LongClick position
-            marker = mMap.addMarker(new MarkerOptions().position(latLng).title("start location"));
+
+            else {
+
+                // show error message
+                Toast.makeText(ChooseLocationActivity.this,
+                        "CANNOT FIND LOCATION INFO",
+                        Toast.LENGTH_SHORT).show();
+
+            }
         }
+
 
     };
 
@@ -77,10 +109,13 @@ public class ChooseLocationActivity extends AppCompatActivity{
     private OnMapReadyCallback onMapReadyCallback = new OnMapReadyCallback() {
         @Override
         public void onMapReady(GoogleMap googleMap) {
-            Log.i("QWERT","HI");
+
             mMap = googleMap;
+
+            // register
             mMap.setOnMyLocationClickListener(onMyLocationClickListener);
             mMap.setOnMapClickListener(onMapClickListener);
+
             setupGoogleMapScreenSettings(googleMap);
         }
     };
@@ -89,13 +124,14 @@ public class ChooseLocationActivity extends AppCompatActivity{
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_choose_location);
+
+
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.chooseLocationMap);
         mapFragment.getMapAsync(onMapReadyCallback);
 
         doneButton = (Button) findViewById(R.id.done);
         cancelButton = (Button) findViewById(R.id.cancel);
-        getCurrentLocationButton = (Button) findViewById(R.id.reset);
 
         doneButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -111,26 +147,17 @@ public class ChooseLocationActivity extends AppCompatActivity{
             }
         });
 
-        getCurrentLocationButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                setGetCurrentLocationButton();
-            }
-        });
     }
 
-
-    public void setGetCurrentLocationButton(){
-        Toast.makeText(this, "Getting your current location", Toast.LENGTH_SHORT).show();
-
-    }
 
     public void setDoneButton() {
 
         Intent intent = new Intent(this, MainActivity.class);
-        startActivity(intent);
+
+        // store latitude and longitude of the start position user selected
         intent.putExtra(Keys.STARTLATITUDE, currentLocation.getLatitude());
         intent.putExtra(Keys.STARTLONGITUDE, currentLocation.getLongitude());
+
         setResult(RESULT_OK,intent);
         finish();
 
@@ -140,10 +167,18 @@ public class ChooseLocationActivity extends AppCompatActivity{
 
     public void setCancelButton() {
 
+        // set current location back to previous location
         currentLocation = previousLocation;
-        String message = Double.toString(currentLocation.getLatitude()) + ", " + Double.toString(currentLocation.getLongitude());
-        Toast.makeText(this, "Reset to:\n" + message, Toast.LENGTH_LONG).show();
+        // generate its latitude and longitude
+        LatLng latLng = new LatLng(currentLocation.getLatitude(),currentLocation.getLatitude());
 
+        // initialize the marker
+        if (marker == null) {
+            marker = mMap.addMarker(new MarkerOptions().position(latLng));
+        }
+
+        // set the marker to a new position
+        marker.setPosition(latLng);
     }
 
 
@@ -161,4 +196,6 @@ public class ChooseLocationActivity extends AppCompatActivity{
         mUiSettings.setTiltGesturesEnabled(true);
         mUiSettings.setRotateGesturesEnabled(true);
     }
+
+
 }
