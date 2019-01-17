@@ -54,6 +54,10 @@ import java.util.concurrent.TimeUnit;
 public class MapsActivity extends AppCompatActivity {
 
     private GoogleMap mMap;
+
+    private double startLatitude = Double.MIN_EXPONENT;
+    private double startLongitude = Double.MIN_EXPONENT;
+
     private FloatingActionButton backButton;
     private FloatingActionButton reloadButton;
 
@@ -124,6 +128,12 @@ public class MapsActivity extends AppCompatActivity {
         mode = intent.getStringExtra(Keys.ACTIVITYTYPE);
         activityType = intent.getStringExtra(Keys.ACTIVITYTYPE);
 
+        if (intent.getStringExtra(Keys.LOCATION_CHANGE).equals("true")) {
+            Log.d(TAG, "get location is enabled");
+            startLatitude = intent.getDoubleExtra(Keys.STARTLATITUDE, 0.0);
+            startLongitude = intent.getDoubleExtra(Keys.STARTLONGITUDE, 0.0);
+        }
+
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
@@ -163,13 +173,28 @@ public class MapsActivity extends AppCompatActivity {
 
             @Override
             public void onLocationChanged(Location location) {
+//
                 if (currentLocation == null) {
-                    currentLocation = location;
+                    if (startLatitude != Double.MIN_EXPONENT & startLongitude != Double.MIN_EXPONENT) {
+                        Location newL = new Location("");
+                        newL.setLatitude(startLatitude);
+                        newL.setLongitude(startLongitude);
+                        currentLocation = newL;
+                    } else {
+                        currentLocation = location;
+                    }
                     HashMap<String, double[]> routeMap = getRoute(currentLocation.getLatitude(), currentLocation.getLongitude(), distance);
                     drawRoute(mMap, routeMap);
                 }
 
-                currentLocation = location;
+                if (startLatitude != Double.MIN_EXPONENT & startLongitude != Double.MIN_EXPONENT) {
+                    Location newL = new Location("");
+                    newL.setLatitude(startLatitude);
+                    newL.setLongitude(startLongitude);
+                    currentLocation = newL;
+                } else {
+                    currentLocation = location;
+                }
             }
 
             @Override

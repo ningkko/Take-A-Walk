@@ -17,6 +17,8 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "PRINT";
 
+    private static String startLocationChanged = "false";
+
     /**
      * activitySpinner ::= walking, biking
      * spinner 1 for larger unit inputs ::= hr, km
@@ -94,6 +96,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         initialize();
+        startLocationChanged = "false";
 
 
         // Specify the layout to use when the list of choices appears
@@ -150,6 +153,8 @@ public class MainActivity extends AppCompatActivity {
             intent.putExtra(Keys.ACTIVITYTYPE, activity);
             intent.putExtra(Keys.STARTLATITUDE,startLatitude);
             intent.putExtra(Keys.STARTLONGITUDE,startLongitude);
+            Log.d(TAG, "location change is " + startLocationChanged);
+            intent.putExtra(Keys.LOCATION_CHANGE, startLocationChanged);
 
             // open maps page
             startActivity(intent);
@@ -168,6 +173,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == Keys.REQUEST_STARTLOCATION) {
             if (resultCode == RESULT_OK) {
+                startLocationChanged = "true";
+                Log.d(TAG, "start location change is " + startLocationChanged);
                 startLatitude = data.getDoubleExtra(Keys.STARTLATITUDE,0.0);
                 startLongitude = data.getDoubleExtra(Keys.STARTLONGITUDE,0.0);
             }
