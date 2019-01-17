@@ -290,7 +290,7 @@ public class MapsActivity extends AppCompatActivity {
             TextView infoWindow = (TextView) findViewById(R.id.info);
             int totalTimeHr = (int)(totalTimeSec/3600);
             int totalTimeMin = (int)((totalTimeSec/60)%60);
-            infoWindow.setText("Total distance: "+String.valueOf((int)totalDistance)+"m"+"\nTotal time: "+totalTimeHr+"hr "+totalTimeMin+"min");
+            infoWindow.setText(" Total distance: "+String.valueOf((int)totalDistance)+"m "+"\n Total time: "+totalTimeHr+"hr "+totalTimeMin+"min ");
         }
     }
 
@@ -298,7 +298,7 @@ public class MapsActivity extends AppCompatActivity {
         ArrayList<Pair<Polyline, String>> polylines = new ArrayList<>();
         for (DirectionsResult result:results) {
             List<LatLng> decodedPath = PolyUtil.decode(result.routes[overview].overviewPolyline.getEncodedPath());
-            Polyline pl = mMap.addPolyline(new PolylineOptions().addAll(decodedPath).color(Color.RED).width(10));
+            Polyline pl = mMap.addPolyline(new PolylineOptions().addAll(decodedPath).color(getColor(R.color.colorPrimary)).width(10));
 
             String time = result.routes[0].legs[0].duration.humanReadable;
             String distance = Long.toString(result.routes[0].legs[0].distance.inMeters);

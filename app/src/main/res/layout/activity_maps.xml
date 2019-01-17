@@ -26,7 +26,7 @@
         android:layout_marginBottom="32dp"
         android:src="@drawable/ic_arrow_back_black_24dp"
         app:fabSize="mini"
-        />
+        app:backgroundTint="@color/colorPrimary" />
 
     <RadioGroup
         android:layout_width="match_parent"
@@ -42,9 +42,9 @@
         android:layout_gravity="top|start"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
-        android:background="@color/colorAccent"
+        android:background="@color/colorPrimary"
         android:text="TextView"
-        android:textColor="@color/common_google_signin_btn_text_dark_focused"
+        android:textColor="@color/white"
         android:textSize="18sp" />
 
 
