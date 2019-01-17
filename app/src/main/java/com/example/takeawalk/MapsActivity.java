@@ -221,9 +221,9 @@ public class MapsActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
             setupGoogleMapScreenSettings(googleMap);
             TravelMode travelMode;
 
-            if (mode == "Walking") {
+            if (mode.equals("walking")) {
                 travelMode = TravelMode.WALKING;
-            } else if (mode == "Biking") {
+            } else if (mode.equals("biking")) {
                 travelMode = TravelMode.BICYCLING;
             } else {
                 travelMode = TravelMode.WALKING;
