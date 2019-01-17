@@ -1,6 +1,7 @@
 package com.example.takeawalk;
 
 import android.content.Intent;
+import android.location.Location;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -84,6 +85,9 @@ public class MainActivity extends AppCompatActivity {
 
     public double distance=0;
 
+    public double startLatitude;
+    public double startLongitude;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -101,6 +105,7 @@ public class MainActivity extends AppCompatActivity {
         spinner1.setAdapter(hrAdapter);
         spinner2.setAdapter(minAdapter);
 
+        startLocationLabel.setText("Current location");
 
         // register listener for get route button
         getRouteButton.setOnClickListener(new View.OnClickListener() {
@@ -149,8 +154,29 @@ public class MainActivity extends AppCompatActivity {
     public void changeLocationHandler(){
 
         Intent intent = new Intent(this, ChooseLocationActivity.class);
-        startActivity(intent);
+        startActivityForResult(intent,Keys.REQUEST_STARTLOCATION);
+
     }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == Keys.REQUEST_STARTLOCATION) {
+            if (resultCode == RESULT_OK) {
+                startLatitude = data.getDoubleExtra(Keys.STARTLATITUDE,0.0);
+                startLongitude = data.getDoubleExtra(Keys.STARTLONGITUDE,0.0);
+            }
+        }
+
+        String latitude = String.format("%.2f",startLatitude);
+        String longitude = String.format("%.2f",startLongitude);
+
+        startLocationLabel.setText(String.format("(%s, %s)",latitude,longitude));
+
+        super.onActivityResult(requestCode, resultCode, data);
+
+
+    }
+
 
     private void initialize() {
 

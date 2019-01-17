@@ -1,9 +1,7 @@
 package com.example.takeawalk;
 
-import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
-import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -13,15 +11,15 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
-import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.maps.model.DirectionsRoute;
 
-public class ChooseLocationActivity extends AppCompatActivity implements OnMapReadyCallback {
+public class ChooseLocationActivity extends AppCompatActivity{
 
     private Button doneButton, cancelButton,getCurrentLocationButton;
 
@@ -39,37 +37,30 @@ public class ChooseLocationActivity extends AppCompatActivity implements OnMapRe
 
     private GoogleMap mMap;
 
+    private Marker marker=null;
 
 
     private GoogleMap.OnMapClickListener onMapClickListener = new GoogleMap.OnMapClickListener() {
         @Override
         public void onMapClick(LatLng latLng) {
-            Log.i("PRINT","MESSAGE:  "+
-                    "onMapLongClick:\n" + latLng.latitude + " : " + latLng.longitude);
+
+            String latitude = String.format("%.2f",latLng.latitude);
+            String longitude = String.format("%.2f",latLng.longitude);
 
             Toast.makeText(ChooseLocationActivity.this,
-                    "onMapClick:\n" + latLng.latitude + " : " + latLng.longitude,
-                    Toast.LENGTH_LONG).show();
-        }
-    };
-
-
-    private GoogleMap.OnMapLongClickListener onMapLongClickListener = new GoogleMap.OnMapLongClickListener() {
-        @Override
-        public void onMapLongClick(LatLng latLng) {
-            Log.i("PRINT",":  "+
-                    "onMapLongClick:\n" + latLng.latitude + " : " + latLng.longitude);
-
-            Toast.makeText(ChooseLocationActivity.this,
-                    "onMapLongClick:\n" + latLng.latitude + " : " + latLng.longitude,
+                    latitude + " : " + longitude,
                     Toast.LENGTH_LONG).show();
 
+            if (marker!=null) {
+                marker.remove();
+            }
             //Add marker on LongClick position
-            MarkerOptions markerOptions =
-                    new MarkerOptions().position(latLng).title(latLng.toString());
-            mMap.addMarker(markerOptions);
+            marker = mMap.addMarker(new MarkerOptions().position(latLng).title("start location"));
         }
+
     };
+
+
 
     private GoogleMap.OnMyLocationClickListener onMyLocationClickListener = new GoogleMap.OnMyLocationClickListener() {
         @Override
@@ -83,13 +74,24 @@ public class ChooseLocationActivity extends AppCompatActivity implements OnMapRe
     };
 
 
-
+    private OnMapReadyCallback onMapReadyCallback = new OnMapReadyCallback() {
+        @Override
+        public void onMapReady(GoogleMap googleMap) {
+            Log.i("QWERT","HI");
+            mMap = googleMap;
+            mMap.setOnMyLocationClickListener(onMyLocationClickListener);
+            mMap.setOnMapClickListener(onMapClickListener);
+            setupGoogleMapScreenSettings(googleMap);
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_choose_location);
-
+        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.chooseLocationMap);
+        mapFragment.getMapAsync(onMapReadyCallback);
 
         doneButton = (Button) findViewById(R.id.done);
         cancelButton = (Button) findViewById(R.id.cancel);
@@ -127,8 +129,10 @@ public class ChooseLocationActivity extends AppCompatActivity implements OnMapRe
 
         Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);
-        intent.putExtra(Keys.STARTLOCATION, currentLocation);
-        startActivity(intent);
+        intent.putExtra(Keys.STARTLATITUDE, currentLocation.getLatitude());
+        intent.putExtra(Keys.STARTLONGITUDE, currentLocation.getLongitude());
+        setResult(RESULT_OK,intent);
+        finish();
 
     }
 
@@ -140,17 +144,6 @@ public class ChooseLocationActivity extends AppCompatActivity implements OnMapRe
         String message = Double.toString(currentLocation.getLatitude()) + ", " + Double.toString(currentLocation.getLongitude());
         Toast.makeText(this, "Reset to:\n" + message, Toast.LENGTH_LONG).show();
 
-    }
-
-
-    @Override
-    public void onMapReady(GoogleMap googleMap) {
-        Log.i("QWERT","HI");
-        mMap = googleMap;
-        mMap.setOnMyLocationClickListener(onMyLocationClickListener);
-        mMap.setOnMapClickListener(onMapClickListener);
-        mMap.setOnMapLongClickListener(onMapLongClickListener);
-        setupGoogleMapScreenSettings(googleMap);
     }
 
 
