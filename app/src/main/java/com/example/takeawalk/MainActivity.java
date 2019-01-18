@@ -283,7 +283,7 @@ public class MainActivity extends AppCompatActivity {
             spinner1.setAdapter(kmAdapter);
             spinner2.setAdapter(kmDeciAdapter);
             unit1.setText(" . ");
-            unit2.setText("Km");
+            unit2.setText("km");
             spinner1.setSelection(s1U2Position);
             spinner2.setSelection(s2U2Position);
         }

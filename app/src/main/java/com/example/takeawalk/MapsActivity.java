@@ -339,7 +339,7 @@ public class MapsActivity extends AppCompatActivity {
             TextView infoWindow = (TextView) findViewById(R.id.info);
             int totalTimeHr = (int)(totalTimeSec/3600);
             int totalTimeMin = (int)((totalTimeSec/60)%60);
-            infoWindow.setText(" Total distance: "+String.valueOf((int)totalDistance/1000)+" Km "+"\n Total time: "+totalTimeHr+" hr "+totalTimeMin+" min ");
+            infoWindow.setText(" Total distance: "+String.valueOf(totalDistance/1000)+" km "+"\n Total time: "+totalTimeHr+" hr "+totalTimeMin+" min ");
         }
     }
 
