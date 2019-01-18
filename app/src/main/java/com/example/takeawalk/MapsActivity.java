@@ -339,7 +339,7 @@ public class MapsActivity extends AppCompatActivity {
             TextView infoWindow = (TextView) findViewById(R.id.info);
             int totalTimeHr = (int)(totalTimeSec/3600);
             int totalTimeMin = (int)((totalTimeSec/60)%60);
-            infoWindow.setText(" Total distance: "+String.valueOf((int)totalDistance)+"m "+"\n Total time: "+totalTimeHr+"hr "+totalTimeMin+"min ");
+            infoWindow.setText(" Total distance: "+String.valueOf((int)totalDistance/1000)+" Km "+"\n Total time: "+totalTimeHr+" hr "+totalTimeMin+" min ");
         }
     }
 
@@ -385,32 +385,24 @@ public class MapsActivity extends AppCompatActivity {
                                 inf = result[0];
                                 pair = results.get(i);
                             }
-
                         }
-
                     }
-
                 }
 
                 if (inf != Double.POSITIVE_INFINITY && pair != null) {
                     Drawable tr = new ColorDrawable(Color.TRANSPARENT);
 
-                    Log.d(TAG, "Second change polyline " + pair.first.toString() + " to blue");
                     //pl.setVisible(true);
-
                     if (lastMarker != null) {
                         lastMarker.remove();
                     }
                     lastMarker = mMap.addMarker(new MarkerOptions()
                             .position(new LatLng(clickCoords.latitude, clickCoords.longitude)).alpha(0).title(pair.second));
-                    Log.d(TAG, "setting color");
                     pair.first.setColor(Color.RED);
                     pair.first.setZIndex(1);
 
-                    Log.d(TAG, "Polyline id " + pair.first.toString() + " title for such polyline is " + pair.second);
                     //open the marker's info window
                     lastMarker.showInfoWindow();
-                    Log.e(TAG, "The second possible method @ " + clickCoords.latitude + " " + clickCoords.longitude);
 
                 }
             }
